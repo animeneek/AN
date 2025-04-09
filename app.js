@@ -47,8 +47,19 @@ function loadAnime(type = 'TRENDING') {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Load nav.html into #nav-placeholder
+  fetch("nav.html")
+    .then(response => response.text())
+    .then(navData => {
+      document.getElementById("nav-placeholder").innerHTML = navData;
+      setupThemeToggle();
+      setupSearchHandler();
+    });
+
+  // Load initial anime list
   loadAnime('TRENDING');
 
+  // Tab switching
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       tabButtons.forEach(b => b.classList.remove('bg-gray-200', 'dark:bg-gray-700'));
@@ -56,24 +67,32 @@ document.addEventListener('DOMContentLoaded', () => {
       loadAnime(btn.dataset.type);
     });
   });
+});
 
-  const searchBox = document.getElementById('searchBox');
-  searchBox.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      window.location.href = `search.html?q=${searchBox.value}`;
-    }
-  });
-
-  // Theme toggle
+function setupThemeToggle() {
   const toggle = document.getElementById('toggleTheme');
-  toggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-  });
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+  }
 
+  // Set theme on first load
   if (localStorage.getItem('theme') === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
   }
-});
+}
+
+function setupSearchHandler() {
+  const searchBox = document.getElementById('searchBox');
+  if (searchBox) {
+    searchBox.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        window.location.href = `search.html?q=${searchBox.value}`;
+      }
+    });
+  }
+}
