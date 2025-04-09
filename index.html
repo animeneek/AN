@@ -1,60 +1,94 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AnimeNeek - v23.15</title>
-  <link rel="icon" href="assets/favicon-image.png" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        fontFamily: {
-          sans: ['Poppins', 'sans-serif'],
-        },
-        extend: {
-          colors: {
-            primary: '#1e293b'
+// anime.js
+const API_URL = 'https://graphql.anilist.co';
+const urlParams = new URLSearchParams(window.location.search);
+const animeId = urlParams.get('id');
+
+function fetchAnimeDetails(id) {
+  const query = 
+    query ($id: Int) {
+      Media(id: $id, type: ANIME) {
+        id
+        title {
+          romaji
+          english
+        }
+        coverImage {
+          extraLarge
+        }
+        description(asHtml: false)
+        genres
+        episodes
+        format
+        status
+        relations {
+          edges {
+            relationType
+            node {
+              id
+              title {
+                romaji
+              }
+              coverImage {
+                large
+              }
+            }
           }
         }
       }
     }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-  <script defer src="app.js"></script>
-</head>
-<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans transition-colors duration-300">
+  ;
 
-  <div id="nav-placeholder"></div>
+  const variables = { id: parseInt(id) };
 
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables })
+  })
+    .then(res => res.json())
+    .then(({ data }) => {
+      const anime = data.Media;
 
-  <!-- Hero Slider -->
-  <section class="relative h-[300px] md:h-[400px] bg-black">
-    <img src="assets/hero.jpg" alt="Hero Background" class="w-full h-full object-cover opacity-30">
-    <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-center px-4">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to AnimeNeek</h1>
-      <p class="max-w-xl text-gray-300">Explore trending, new, and top-rated anime with ease.</p>
-    </div>
-  </section>
+      // Anime Info Section
+      document.getElementById('animeDetails').innerHTML = 
+        <img src="${anime.coverImage.extraLarge}" alt="${anime.title.romaji}" class="rounded shadow max-w-full">
+        <div class="md:col-span-2">
+          <h1 class="text-3xl font-bold mb-2">${anime.title.english || anime.title.romaji}</h1>
+          <p class="text-sm mb-4">${anime.description || 'No description available.'}</p>
+          <p><strong>Genres:</strong> ${anime.genres.join(', ')}</p>
+          <p><strong>Format:</strong> ${anime.format}</p>
+          <p><strong>Status:</strong> ${anime.status}</p>
+          <p><strong>Episodes:</strong> ${anime.episodes || 'Unknown'}</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href="watch.html?id=${anime.id}&type=sub" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Watch Sub</a>
+            <a href="watch.html?id=${anime.id}&type=dub" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Watch Dub</a>
+            <a href="watch.html?id=${anime.id}&type=raw" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Watch Raw</a>
+          </div>
+        </div>
+      ;
 
-  <!-- Anime Sections -->
-  <div class="max-w-screen-xl mx-auto p-4">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-semibold">Anime Picks</h2>
-      <div class="space-x-2">
-        <button class="tab-btn bg-gray-200 dark:bg-gray-700 text-black dark:text-white px-4 py-1 rounded" data-type="TRENDING">Trending</button>
-        <button class="tab-btn px-4 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600" data-type="POPULAR">Popular</button>
-        <button class="tab-btn px-4 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600" data-type="TOP">Top Rated</button>
-      </div>
-    </div>
+      // Related Anime Section
+      const related = anime.relations.edges;
+      if (related.length > 0) {
+        document.getElementById('relatedAnime').innerHTML = related.map(rel => 
+          <a href="anime.html?id=${rel.node.id}" class="bg-gray-200 dark:bg-gray-700 rounded overflow-hidden shadow hover:scale-105 transition">
+            <img src="${rel.node.coverImage.large}" alt="${rel.node.title.romaji}" class="w-full h-40 object-cover">
+            <div class="p-2 text-sm text-center">${rel.node.title.romaji}</div>
+          </a>
+        ).join('');
+      } else {
+        document.getElementById('relatedAnime').innerHTML = <p class="text-sm text-gray-400">No related anime found.</p>;
+      }
+    });
+}
 
-    <div id="animeSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" data-aos="fade-up"></div>
-  </div>
+document.addEventListener('DOMContentLoaded', () => {
+  if (animeId) fetchAnimeDetails(animeId);
 
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script>AOS.init();</script>
-</body>
-</html>
+  const searchBox = document.getElementById('searchBox');
+  searchBox.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      window.location.href = search.html?q=${searchBox.value};
+    }
+  });
+});
