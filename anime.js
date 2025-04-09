@@ -92,3 +92,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+//addedbyme
+document.addEventListener('DOMContentLoaded', () => {
+  // Load nav.html into #nav-placeholder
+  fetch("nav.html")
+    .then(response => response.text())
+    .then(navData => {
+      document.getElementById("nav-placeholder").innerHTML = navData;
+      setupThemeToggle();
+      setupSearchHandler();
+    });
