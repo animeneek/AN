@@ -29,22 +29,6 @@
     </div>
   </main>
   
-  <!-- Inject nav.html and then load anime.js -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Dynamically load nav.html
-      fetch('nav.html')
-        .then(response => response.text())
-        .then(navData => {
-          document.getElementById('nav-placeholder').innerHTML = navData;
-          
-          // Now load anime.js after the nav is loaded
-          const script = document.createElement('script');
-          script.src = 'anime.js';
-          script.defer = true;
-          document.body.appendChild(script);
-        });
-    });
-  </script>
+<script defer src="app.js"></script>
 </body>
 </html>
