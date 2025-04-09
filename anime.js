@@ -1,8 +1,10 @@
 // anime.js
+
 const API_URL = 'https://graphql.anilist.co';
 const urlParams = new URLSearchParams(window.location.search);
 const animeId = urlParams.get('id');
 
+// Function to fetch the anime details
 function fetchAnimeDetails(id) {
   const query = `
     query ($id: Int) {
@@ -82,13 +84,52 @@ function fetchAnimeDetails(id) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (animeId) fetchAnimeDetails(animeId);
+// Function to load nav.html into the page
+function loadNav() {
+  fetch("nav.html")
+    .then(response => response.text())
+    .then(navData => {
+      document.getElementById("nav-placeholder").innerHTML = navData;
+      setupThemeToggle();
+      setupSearchHandler();
+    });
+}
 
+// Set up theme toggle functionality
+function setupThemeToggle() {
+  const toggle = document.getElementById('toggleTheme');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+  }
+
+  // Set theme on first load
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
+// Set up search functionality
+function setupSearchHandler() {
   const searchBox = document.getElementById('searchBox');
-  searchBox.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      window.location.href = `search.html?q=${searchBox.value}`;
-    }
-  });
+  if (searchBox) {
+    searchBox.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        window.location.href = `search.html?q=${searchBox.value}`;
+      }
+    });
+  }
+}
+
+// Wait until the page content is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Load navigation bar
+  loadNav();
+
+  // If there's an anime ID in the URL, fetch and display anime details
+  if (animeId) fetchAnimeDetails(animeId);
 });
