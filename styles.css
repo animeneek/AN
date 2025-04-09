@@ -6,7 +6,7 @@
 }
 
 body {
-  background-color: #111827; /* Tailwind gray-900 */
+  background-color: #000000; /* Tailwind gray-900 */
   color: #f3f4f6;            /* Tailwind gray-100 */
   font-family: 'Segoe UI', sans-serif;
   line-height: 1.6;
@@ -14,7 +14,7 @@ body {
 
 /* -------------------- NAVBAR -------------------- */
 nav {
-  background-color: #1f2937; /* Tailwind gray-800 */
+  background-color: #222; /* Tailwind gray-800 */
   padding: 1rem 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
@@ -104,7 +104,7 @@ h2 {
 }
 
 .card {
-  background-color: #1f2937;
+  background-color: #222;
   border-radius: 0.5rem;
   overflow: hidden;
   transition: transform 0.3s ease;
