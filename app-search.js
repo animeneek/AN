@@ -1,7 +1,6 @@
 const API_URL = 'https://graphql.anilist.co';
 
 // ========== INDEX PAGE: TRENDING/POPULAR/TOP ANIME LOADER ==========
-
 const tabButtons = document.querySelectorAll('.tab-btn');
 const animeSection = document.getElementById('animeSection');
 
@@ -78,7 +77,7 @@ function searchAnime(query, genre = '', page = 1, append = false) {
   `;
 
   const variables = {
-    search: query,
+    search: query.trim() !== '' ? query : undefined, // ✅ Fix here
     genre: genre ? [genre] : undefined,
     page
   };
@@ -245,13 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (query) {
-    searchAnime(currentQuery, currentGenre, 1, false);
+  searchAnime(currentQuery, currentGenre, 1, false); // ✅ Always run, even if empty
 
-    window.addEventListener('scroll', () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-        searchAnime(currentQuery, currentGenre, currentPage, true);
-      }
-    });
-  }
+  window.addEventListener('scroll', () => {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+      searchAnime(currentQuery, currentGenre, currentPage, true);
+    }
+  });
 });
