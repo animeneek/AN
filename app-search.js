@@ -52,14 +52,25 @@ function loadAnime(type = 'TRENDING') {
 
 // ========== SEARCH PAGE: ANIME SEARCH + GENRE FILTER ==========
 
-function searchAnime(query, genre = '') {
+let currentPage = 1;
+let isLoading = false;
+let hasMoreResults = true;
+
+function searchAnime(query, genre = '', page = 1, append = false) {
+  if (isLoading || !hasMoreResults) return;
+  isLoading = true;
+
   const gql = `
-    query ($search: String, $genre: [String]) {
-      Page(perPage: 30) {
+    query ($search: String, $genre: [String], $page: Int) {
+      Page(page: $page, perPage: 30) {
         media(search: $search, genre_in: $genre, type: ANIME) {
           id
           title { romaji }
           coverImage { large }
+        }
+        pageInfo {
+          currentPage
+          hasNextPage
         }
       }
     }
@@ -67,13 +78,16 @@ function searchAnime(query, genre = '') {
 
   const variables = {
     search: query,
-    genre: genre ? [genre] : undefined
+    genre: genre ? [genre] : undefined,
+    page
   };
 
   const results = document.getElementById('results');
   if (!results) return;
 
-  results.innerHTML = '<p class="col-span-full text-center text-gray-500">Loading...</p>';
+  if (!append) {
+    results.innerHTML = '<p class="col-span-full text-center text-gray-500">Loading...</p>';
+  }
 
   fetch(API_URL, {
     method: 'POST',
@@ -82,12 +96,16 @@ function searchAnime(query, genre = '') {
   })
     .then(res => res.json())
     .then(data => {
-      if (!data?.data?.Page?.media?.length) {
+      const media = data.data.Page.media;
+      hasMoreResults = data.data.Page.pageInfo.hasNextPage;
+      currentPage = data.data.Page.pageInfo.currentPage + 1;
+
+      if (!media?.length && !append) {
         results.innerHTML = '<p class="col-span-full text-center text-gray-400">No results found.</p>';
         return;
       }
 
-      results.innerHTML = data.data.Page.media.map(anime => {
+      const cardsHTML = media.map(anime => {
         const title = anime.title?.romaji || 'Untitled';
         const image = anime.coverImage?.large || 'assets/fallback.jpg';
         return `
@@ -97,10 +115,19 @@ function searchAnime(query, genre = '') {
           </a>
         `;
       }).join('');
+
+      if (append) {
+        results.insertAdjacentHTML('beforeend', cardsHTML);
+      } else {
+        results.innerHTML = cardsHTML;
+      }
     })
     .catch(err => {
       console.error(err);
       results.innerHTML = '<p class="text-red-500 col-span-full">Failed to load results.</p>';
+    })
+    .finally(() => {
+      isLoading = false;
     });
 }
 
@@ -115,7 +142,6 @@ function setupThemeToggle() {
     });
   }
 
-  // Set theme on first load
   if (localStorage.getItem('theme') === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
@@ -137,7 +163,6 @@ function setupSearchHandler() {
 // ========== DOM READY ==========
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Load nav.html into #nav-placeholder if present
   const navPlaceholder = document.getElementById("nav-placeholder");
   if (navPlaceholder) {
     fetch("nav.html")
@@ -152,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSearchHandler();
   }
 
-  // Home page (tabs)
+  // Home page
   if (tabButtons.length && animeSection) {
     loadAnime('TRENDING');
 
@@ -171,16 +196,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Search page (genre filter)
+  // Search page
   const urlParams = new URLSearchParams(window.location.search);
   const query = urlParams.get('q') || '';
-
   const genreSelect = document.getElementById('genre');
-  if (genreSelect && query) {
-    genreSelect.addEventListener('change', () => {
-      searchAnime(query, genreSelect.value);
-    });
 
-    searchAnime(query);
+  let currentQuery = query;
+  let currentGenre = '';
+
+  if (genreSelect) {
+    genreSelect.addEventListener('change', () => {
+      currentGenre = genreSelect.value;
+      currentPage = 1;
+      hasMoreResults = true;
+      searchAnime(currentQuery, currentGenre, 1, false);
+    });
+  }
+
+  if (query) {
+    searchAnime(currentQuery, currentGenre, 1, false);
+
+    window.addEventListener('scroll', () => {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+        searchAnime(currentQuery, currentGenre, currentPage, true);
+      }
+    });
   }
 });
