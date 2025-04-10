@@ -110,7 +110,10 @@ function searchAnime(query, genre = '', page = 1, append = false) {
         const image = anime.coverImage?.large || 'assets/fallback.jpg';
         return `
           <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-gray-800 rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
-            <img src="${image}" alt="${title}" class="w-full h-90 object-cover" />
+            <div class="w-full aspect-[2/3] overflow-hidden">
+  <img src="${image}" alt="${title}" class="w-full h-full object-cover" />
+</div>
+
             <div class="p-2 text-sm text-center font-semibold">${title}</div>
           </a>
         `;
