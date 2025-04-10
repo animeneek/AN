@@ -46,15 +46,18 @@
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-2xl font-semibold">Anime Picks</h2>
       <div class="space-x-2">
+        <!-- Active Button -->
         <button class="tab-btn px-4 py-1 rounded text-white bg-[#ff4444] hover:bg-[#ff5555]" data-type="TRENDING">Trending</button>
-        <button class="tab-btn px-4 py-1 rounded text-white bg-transparent hover:bg-[#ff5555]" data-type="POPULAR">Popular</button>
-        <button class="tab-btn px-4 py-1 rounded text-white bg-transparent hover:bg-[#ff5555]" data-type="TOP">Top Rated</button>
 
+        <!-- Inactive Buttons -->
+        <button class="tab-btn px-4 py-1 rounded text-black dark:text-white bg-transparent hover:bg-[#ff5555]" data-type="POPULAR">Popular</button>
+        <button class="tab-btn px-4 py-1 rounded text-black dark:text-white bg-transparent hover:bg-[#ff5555]" data-type="TOP">Top Rated</button>
       </div>
     </div>
 
     <div id="animeSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" data-aos="fade-up"></div>
   </div>
+
 
 
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
