@@ -59,11 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load initial anime list
   loadAnime('TRENDING');
 
-  // Tab switching
+  // Tab switching logic with active style handling
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      tabButtons.forEach(b => b.classList.remove('bg-gray-200', 'dark:bg-gray-700'));
-      btn.classList.add('bg-gray-200', 'dark:bg-gray-700');
+      // Remove active styles from all
+      tabButtons.forEach(b => {
+        b.classList.remove('bg-[#ff4444]', 'text-white');
+        b.classList.add('bg-transparent', 'text-black', 'dark:text-white');
+      });
+
+      // Add active styles to clicked button
+      btn.classList.remove('bg-transparent', 'text-black', 'dark:text-white');
+      btn.classList.add('bg-[#ff4444]', 'text-white');
+
+      // Load new content
       loadAnime(btn.dataset.type);
     });
   });
