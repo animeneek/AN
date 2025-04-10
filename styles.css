@@ -127,6 +127,10 @@ h2 {
   text-align: center;
 }
 
+.h-52 {
+    height: 24rem;
+}
+
 /* -------------------- ANIME INFO PAGE -------------------- */
 #animeDetails {
   display: flex;
