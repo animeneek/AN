@@ -54,7 +54,7 @@ function loadAnime(type = 'TRENDING') {
 
 function searchAnime(query, genre = '') {
   const gql = `
-    query ($search: String, $genre: String) {
+    query ($search: String, $genre: [String]) {
       Page(perPage: 30) {
         media(search: $search, genre_in: $genre, type: ANIME) {
           id
@@ -67,7 +67,7 @@ function searchAnime(query, genre = '') {
 
   const variables = {
     search: query,
-    genre: genre ? [genre] : null
+    genre: genre ? [genre] : undefined
   };
 
   const results = document.getElementById('results');
