@@ -1,4 +1,3 @@
-// app-search.js
 const API_URL = 'https://graphql.anilist.co';
 
 // ========== INDEX PAGE: TRENDING/POPULAR/TOP ANIME LOADER ==========
@@ -42,7 +41,9 @@ function loadAnime(type = 'TRENDING') {
         const image = anime.coverImage?.large || 'assets/fallback.jpg';
         return `
           <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-gray-800 rounded shadow hover:scale-105 transition overflow-hidden" data-aos="fade-up">
-            <img src="${image}" alt="${title}" class="w-full h-90 object-cover" />
+            <div class="w-full aspect-[2/3] overflow-hidden">
+              <img src="${image}" alt="${title}" class="w-full h-full object-cover" />
+            </div>
             <div class="p-2 text-sm text-center font-semibold">${title}</div>
           </a>
         `;
@@ -50,7 +51,7 @@ function loadAnime(type = 'TRENDING') {
     });
 }
 
-// ========== SEARCH PAGE: ANIME SEARCH + GENRE FILTER ==========
+// ========== SEARCH PAGE: ANIME SEARCH + GENRE FILTER + INFINITE SCROLL ==========
 
 let currentPage = 1;
 let isLoading = false;
@@ -111,9 +112,8 @@ function searchAnime(query, genre = '', page = 1, append = false) {
         return `
           <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-gray-800 rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
             <div class="w-full aspect-[2/3] overflow-hidden">
-  <img src="${image}" alt="${title}" class="w-full h-full object-cover" />
-</div>
-
+              <img src="${image}" alt="${title}" class="w-full h-full object-cover" />
+            </div>
             <div class="p-2 text-sm text-center font-semibold">${title}</div>
           </a>
         `;
@@ -131,6 +131,34 @@ function searchAnime(query, genre = '', page = 1, append = false) {
     })
     .finally(() => {
       isLoading = false;
+    });
+}
+
+// ========== DYNAMIC GENRE FETCHER ==========
+
+function fetchGenres() {
+  const query = `query { GenreCollection }`;
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const genreSelect = document.getElementById('genre');
+      if (!genreSelect) return;
+
+      genreSelect.innerHTML = '<option value="">All Genres</option>';
+      data.data.GenreCollection.forEach(genre => {
+        const option = document.createElement('option');
+        option.value = genre;
+        option.textContent = genre;
+        genreSelect.appendChild(option);
+      });
+    })
+    .catch(err => {
+      console.error('Failed to load genres:', err);
     });
 }
 
@@ -208,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentGenre = '';
 
   if (genreSelect) {
+    fetchGenres();
     genreSelect.addEventListener('change', () => {
       currentGenre = genreSelect.value;
       currentPage = 1;
