@@ -27,6 +27,7 @@ function fetchAnimeDetails(id) {
             relationType
             node {
               id
+              type
               title {
                 romaji
               }
@@ -70,7 +71,7 @@ function fetchAnimeDetails(id) {
       `;
 
       // Related Anime Section
-      const related = anime.relations.edges;
+      const related = anime.relations.edges.filter(rel => rel.node.type === 'ANIME');
       if (related.length > 0) {
         document.getElementById('relatedAnime').innerHTML = related.map(rel => `
           <a href="anime.html?id=${rel.node.id}" class="bg-gray-200 dark:bg-gray-700 rounded overflow-hidden shadow hover:scale-105 transition">
