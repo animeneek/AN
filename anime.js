@@ -65,9 +65,7 @@ async function fetchAnimeDetails(id) {
         <p><strong>Status:</strong> ${anime.status}</p>
         <p><strong>Episodes:</strong> ${anime.episodes || 'Unknown'}</p>
         <div class="mt-4 flex flex-wrap gap-2">
-          ${createWatchButton(anime.id, 'sub', availableLangs)}
-          ${createWatchButton(anime.id, 'dub', availableLangs)}
-          ${createWatchButton(anime.id, 'raw', availableLangs)}
+          ${createWatchButtons(anime.id, availableLangs)}
         </div>
       </div>
     `;
@@ -112,19 +110,19 @@ async function getAvailableLanguages(malId) {
   }
 }
 
-function createWatchButton(animeId, type, availableLangs) {
+function createWatchButtons(animeId, langs) {
   const langMap = {
     sub: { color: 'blue', label: 'Sub' },
     dub: { color: 'green', label: 'Dub' },
     raw: { color: 'red', label: 'Raw' }
   };
 
-  const isAvailable = availableLangs.includes(type);
-  return `<a href="${isAvailable ? `watch.html?id=${animeId}&type=${type}` : '#'}" 
-    class="px-4 py-2 rounded text-white bg-${langMap[type].color}-${isAvailable ? '500' : '300'} 
-    ${isAvailable ? `hover:bg-${langMap[type].color}-600` : 'cursor-not-allowed'} pointer-events-${isAvailable ? 'auto' : 'none'}">
-    Watch ${langMap[type].label}
-  </a>`;
+  return langs.map(type => `
+    <a href="watch.html?id=${animeId}&type=${type}" 
+       class="px-4 py-2 rounded text-white bg-${langMap[type].color}-500 hover:bg-${langMap[type].color}-600 transition">
+      Watch ${langMap[type].label}
+    </a>
+  `).join('');
 }
 
 function loadNav() {
