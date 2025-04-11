@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Watch Anime</title>
+  <title>Watch Anime - AnimeNeek</title>
   <link rel="icon" href="assets/favicon-image.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -15,30 +15,33 @@
       }
     };
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css" />
-  <script defer src="watch.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans transition-colors duration-300">
+  <!-- Navigation -->
   <div id="nav-placeholder"></div>
 
-  <main class="max-w-5xl mx-auto p-4 space-y-6">
-    <h1 id="animeTitle" class="text-2xl font-semibold text-center">Loading...</h1>
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto p-4">
+    <h1 id="animeTitle" class="text-2xl font-semibold mb-4 text-center">Loading...</h1>
 
-    <div class="aspect-video rounded overflow-hidden shadow">
-      <iframe id="videoPlayer" class="w-full h-full hidden" src="" frameborder="0" allowfullscreen></iframe>
+    <div class="aspect-video rounded overflow-hidden shadow mb-4">
+      <iframe id="videoPlayer" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
     </div>
 
-    <div id="sourceButtons" class="flex flex-wrap gap-3 justify-center hidden"></div>
-
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-      <select id="episodeSelect" class="w-full sm:w-auto px-4 py-2 rounded bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
+    <!-- Episode Selector -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+      <select id="episodeSelect" class="border px-4 py-2 rounded text-black dark:text-white dark:bg-gray-800">
         <option value="">Select Episode</option>
       </select>
-      <button id="playButton" disabled class="px-4 py-2 rounded bg-blue-500 text-white font-semibold disabled:opacity-50">
-        Play
-      </button>
+      <button id="playButton" disabled class="px-4 py-2 rounded bg-blue-500 text-white font-semibold disabled:opacity-50">Play</button>
     </div>
+
+    <!-- Source Buttons -->
+    <div id="sourceButtons" class="flex flex-wrap justify-center gap-3"></div>
   </main>
+
+  <script defer src="watch.js"></script>
 </body>
 </html>
