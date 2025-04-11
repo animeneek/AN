@@ -91,6 +91,8 @@ function generateSources(ep) {
     sources.push(`https://s3taku.one/watch?play=${id}&sv=1`);
   } else if (src === 'streamtape') {
     sources.push(`https://streamtape.com/e/${id}`);
+  } else if (src === 'URL') {
+    sources.push(`https://cdn.dribbble.com/userupload/21563026/file/original-a44d91cec645a143d0fc2fbdbb017cf4.gif`);
   } else if (src === 'mp4upload') {
     sources.push(`https://mp4upload.com/v/${id}`);
   }
