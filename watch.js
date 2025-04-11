@@ -148,9 +148,13 @@ async function init() {
 
     playButton.addEventListener("click", () => {
       if (!selectedEpisode) return;
+      
+      // Update the URL with the selected episode number
       const url = new URL(window.location.href);
       url.searchParams.set("ep", selectedEpisode["data-ep-num"]);
       window.history.pushState({}, "", url);
+
+      // Update title and player
       updateTitle(selectedEpisode["data-ep-num"]);
       updatePlayer(selectedEpisode);
     });
