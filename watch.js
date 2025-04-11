@@ -1,18 +1,20 @@
-// Load nav
+// Load navigation
 fetch("nav.html")
   .then((res) => res.text())
   .then((data) => (document.getElementById("nav-placeholder").innerHTML = data));
 
-// Utility: Get query param
+// Utility: Get query parameters from URL
 function getParam(name) {
   const url = new URL(window.location.href);
   return url.searchParams.get(name);
 }
 
+// Extract parameters from URL
 const anilistId = getParam("id");
 const type = getParam("type");
-const episodeNum = parseInt(getParam("ep"));
+const episodeNum = parseInt(getParam("ep"), 10);
 
+// DOM elements
 const titleEl = document.getElementById("animeTitle");
 const videoPlayer = document.getElementById("videoPlayer");
 const posterImage = document.getElementById("posterImage");
@@ -26,7 +28,7 @@ let animeTitle = "";
 let malId = null;
 let allEpisodes = [];
 
-// Fetch MyAnimeList ID from AniList ID
+// Fetch MyAnimeList (MAL) ID from AniList ID
 async function getMalIdFromAnilistId(id) {
   const query = `
     query ($id: Int) {
@@ -41,7 +43,7 @@ async function getMalIdFromAnilistId(id) {
       }
     }
   `;
-  const variables = { id: parseInt(id) };
+  const variables = { id: parseInt(id, 10) };
   const response = await fetch("https://graphql.anilist.co", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -109,6 +111,7 @@ function updatePlayer(episodeData) {
 async function init() {
   try {
     malId = await getMalIdFromAnilistId(anilistId);
+
     const jsonRes = await fetch(
       "https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json"
     );
@@ -150,12 +153,14 @@ async function init() {
       updateTitle(); // No ep number
     }
 
+    // Handle episode selection
     episodeSelect.addEventListener("change", () => {
-      const selectedNum = parseInt(episodeSelect.value);
+      const selectedNum = parseInt(episodeSelect.value, 10);
       selectedEpisode = allEpisodes.find((ep) => ep["data-ep-num"] === selectedNum);
       playButton.disabled = !selectedEpisode;
     });
 
+    // Handle play button click
     playButton.addEventListener("click", () => {
       if (!selectedEpisode) return;
 
