@@ -1,152 +1,164 @@
-// watch.js
+// Load nav
+fetch("nav.html")
+  .then(res => res.text())
+  .then(data => document.getElementById("nav-placeholder").innerHTML = data);
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Load nav
-  fetch('nav.html')
-    .then(res => res.text())
-    .then(nav => {
-      document.getElementById('nav-placeholder').innerHTML = nav;
-      const searchBox = document.getElementById('searchBox');
-      if (searchBox) {
-        searchBox.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            window.location.href = `search.html?q=${searchBox.value}`;
-          }
-        });
-      }
-    });
+// Utility: Get query param
+function getParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const anilistId = parseInt(urlParams.get('id'));
-  const type = (urlParams.get('type') || 'sub').toLowerCase();
-  const selectedEp = parseInt(urlParams.get('ep'));
+const anilistId = getParam("id");
+const type = getParam("type");
+const episodeNum = parseInt(getParam("ep"));
 
-  const titleEl = document.getElementById('animeTitle');
-  const posterImage = document.getElementById('posterImage');
-  const posterOverlay = document.getElementById('posterOverlay');
-  const episodeSelect = document.getElementById('episodeSelect');
-  const playButton = document.getElementById('playButton');
-  const videoPlayer = document.getElementById('videoPlayer');
-  const sourceButtons = document.getElementById('sourceButtons');
+const titleEl = document.getElementById("animeTitle");
+const videoPlayer = document.getElementById("videoPlayer");
+const posterImage = document.getElementById("posterImage");
+const posterOverlay = document.getElementById("posterOverlay");
+const episodeSelect = document.getElementById("episodeSelect");
+const playButton = document.getElementById("playButton");
+const sourceButtons = document.getElementById("sourceButtons");
 
-  let episodeData = [];
-  let currentTitle = '';
-  let currentPoster = '';
-  let malId = null;
+let selectedEpisode = null;
+let animeTitle = "";
+let malId = null;
+let allEpisodes = [];
 
-  // Get AniList info and MAL id
-  fetch('https://graphql.anilist.co', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: `
-        query ($id: Int) {
-          Media(id: $id, type: ANIME) {
-            idMal
-            title {
-              romaji
-              english
-            }
-            coverImage {
-              large
-            }
-          }
+async function getMalIdFromAnilistId(id) {
+  const query = `
+    query ($id: Int) {
+      Media(id: $id) {
+        idMal
+        title {
+          romaji
         }
-      `,
-      variables: { id: anilistId }
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      const media = data.data.Media;
-      malId = media.idMal;
-      currentTitle = media.title.english || media.title.romaji;
-      currentPoster = media.coverImage.large;
-
-      titleEl.textContent = selectedEp
-        ? `${currentTitle} [${type.toUpperCase()}] - Episode ${selectedEp}`
-        : `${currentTitle} [${type.toUpperCase()}]`;
-
-      posterImage.src = currentPoster;
-
-      return fetch('https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json');
-    })
-    .then(res => res.json())
-    .then(json => {
-      const animeEntry = json.find(entry => entry['data-mal-id'] === malId);
-      if (!animeEntry) return;
-
-      episodeData = animeEntry.episodes.filter(ep => ep['data-ep-lan'].toLowerCase() === type);
-
-      // Populate episode dropdown
-      episodeSelect.innerHTML = '<option value="">Select Episode</option>';
-      episodeData.forEach(ep => {
-        const opt = document.createElement('option');
-        opt.value = ep['data-ep-num'];
-        opt.textContent = `Episode ${ep['data-ep-num']}`;
-        episodeSelect.appendChild(opt);
-      });
-
-      // If ep is in URL, set and play
-      if (selectedEp) {
-        episodeSelect.value = selectedEp;
-        playEpisode(selectedEp);
+        coverImage {
+          large
+        }
       }
+    }
+  `;
+  const variables = { id: parseInt(id) };
+  const response = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables })
+  });
 
-      // Enable play button when dropdown changes
-      episodeSelect.addEventListener('change', () => {
-        playButton.disabled = episodeSelect.value === "";
-      });
+  const json = await response.json();
+  animeTitle = json.data.Media.title.romaji;
+  posterImage.src = json.data.Media.coverImage.large;
+  return json.data.Media.idMal;
+}
 
-      // On Play click
-      playButton.addEventListener('click', () => {
-        const ep = parseInt(episodeSelect.value);
-        if (!ep) return;
-        history.pushState(null, '', `watch.html?id=${anilistId}&type=${type}&ep=${ep}`);
-        playEpisode(ep);
-      });
+function getEmbedLinks(srcType, videoId) {
+  if (srcType === "anime") {
+    return [
+      `//s3taku.one/watch?play=${videoId}`,
+      `//s3taku.one/watch?play=${videoId}&sv=1`
+    ];
+  } else if (srcType === "streamtape") {
+    return [`//streamtape.com/e/${videoId}`];
+  } else if (srcType === "mp4upload") {
+    return [`//mp4upload.com/v/${videoId}`];
+  }
+  return [];
+}
+
+function updateSourceButtons(episodeData) {
+  sourceButtons.innerHTML = "";
+  const links = getEmbedLinks(episodeData["data-src"], episodeData["data-video-id"]);
+  links.forEach((link, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = `Source ${index + 1}`;
+    btn.className = "bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition";
+    btn.addEventListener("click", () => {
+      videoPlayer.src = link;
     });
+    sourceButtons.appendChild(btn);
+  });
+}
 
-  function playEpisode(epNum) {
-    const ep = episodeData.find(e => e['data-ep-num'] === epNum);
-    if (!ep) return;
+function updateTitle(epNum) {
+  const lang = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+  if (epNum) {
+    titleEl.textContent = `${animeTitle} [${lang}] - Episode ${epNum}`;
+  } else {
+    titleEl.textContent = `${animeTitle} [${lang}]`;
+  }
+}
 
-    // Hide poster, show iframe
-    posterOverlay.style.display = 'none';
-    videoPlayer.style.display = 'block';
+function updatePlayer(episodeData) {
+  const links = getEmbedLinks(episodeData["data-src"], episodeData["data-video-id"]);
+  if (links.length > 0) {
+    videoPlayer.src = links[0];
+    videoPlayer.classList.remove("hidden");
+    posterOverlay.classList.add("hidden");
+    updateSourceButtons(episodeData);
+  }
+}
 
-    // Set title
-    titleEl.textContent = `${currentTitle} [${type.toUpperCase()}] - Episode ${epNum}`;
+async function init() {
+  try {
+    malId = await getMalIdFromAnilistId(anilistId);
+    const jsonRes = await fetch("https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json");
+    const json = await jsonRes.json();
 
-    // Load embed links
-    const srcType = ep['data-src'];
-    const vid = ep['data-video-id'];
-    let sources = [];
-
-    if (srcType === 'anime') {
-      sources = [
-        `https://s3taku.one/watch?play=${vid}`,
-        `https://s3taku.one/watch?play=${vid}&sv=1`
-      ];
-    } else if (srcType === 'streamtape') {
-      sources = [`https://streamtape.com/e/${vid}`];
-    } else if (srcType === 'mp4upload') {
-      sources = [`https://mp4upload.com/v/${vid}`];
+    const animeEntry = json.find(entry => entry["data-mal-id"] === malId);
+    if (!animeEntry) {
+      titleEl.textContent = "No episodes found.";
+      return;
     }
 
-    // Load default video
-    videoPlayer.src = sources[0];
+    allEpisodes = animeEntry.episodes.filter(ep => ep["data-ep-lan"].toLowerCase() === type.toLowerCase());
+    if (allEpisodes.length === 0) {
+      titleEl.textContent = `No ${type} episodes available.`;
+      return;
+    }
 
-    // Create source buttons
-    sourceButtons.innerHTML = '';
-    sources.forEach((link, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-sm mr-2';
-      btn.textContent = `Source ${i + 1}`;
-      btn.onclick = () => {
-        videoPlayer.src = link;
-      };
-      sourceButtons.appendChild(btn);
+    // Populate episode dropdown
+    allEpisodes.forEach(ep => {
+      const option = document.createElement("option");
+      option.value = ep["data-ep-num"];
+      option.textContent = `Episode ${ep["data-ep-num"]}`;
+      episodeSelect.appendChild(option);
     });
+
+    // Preselect episode if exists in URL
+    if (!isNaN(episodeNum)) {
+      const epData = allEpisodes.find(ep => ep["data-ep-num"] === episodeNum);
+      if (epData) {
+        episodeSelect.value = episodeNum;
+        updateTitle(episodeNum);
+        updatePlayer(epData);
+        selectedEpisode = epData;
+        playButton.disabled = false;
+      }
+    } else {
+      updateTitle(); // No ep number
+    }
+
+    episodeSelect.addEventListener("change", () => {
+      const selectedNum = parseInt(episodeSelect.value);
+      selectedEpisode = allEpisodes.find(ep => ep["data-ep-num"] === selectedNum);
+      playButton.disabled = !selectedEpisode;
+    });
+
+    playButton.addEventListener("click", () => {
+      if (!selectedEpisode) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set("ep", selectedEpisode["data-ep-num"]);
+      window.history.pushState({}, "", url);
+      updateTitle(selectedEpisode["data-ep-num"]);
+      updatePlayer(selectedEpisode);
+    });
+
+  } catch (err) {
+    console.error("Error loading watch page:", err);
+    titleEl.textContent = "Something went wrong.";
   }
-});
+}
+
+init();
