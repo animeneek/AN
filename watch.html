@@ -1,4 +1,3 @@
-<!-- watch.html -->
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -16,39 +15,39 @@
       }
     };
   </script>
-  <script defer src="app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <script defer src="watch.js"></script>
   <link rel="stylesheet" href="styles.css" />
+  <script defer src="watch.js"></script>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans transition-colors duration-300">
   <div id="nav-placeholder"></div>
 
-  <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-4 gap-6">
-    <!-- Episode List on Right -->
-    <section class="md:col-span-3">
-      <h1 id="animeTitle" class="text-xl font-semibold mb-2">Watch Episode</h1>
+  <main class="max-w-7xl mx-auto p-4">
+    <h1 id="animeTitle" class="text-2xl font-semibold mb-4">Watch Episode</h1>
 
-      <div class="aspect-video rounded overflow-hidden shadow mb-4">
-        <iframe id="videoPlayer" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Left: Video Player & Controls -->
+      <div class="flex-1">
+        <div class="aspect-video rounded overflow-hidden shadow mb-4">
+          <iframe id="videoPlayer" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+
+        <!-- Source Buttons -->
+        <div id="sourceButtons" class="flex flex-wrap gap-2 mb-4"></div>
+
+        <!-- Episode Dropdown -->
+        <div class="flex items-center gap-2 mb-4">
+          <select id="episodeDropdown" class="px-4 py-2 rounded bg-gray-800 text-white"></select>
+          <button id="playButton" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded">Play</button>
+        </div>
       </div>
 
-      <div id="sourceButtons" class="flex gap-4 mb-4 hidden">
-        <button id="sourceDefault" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">Source 1</button>
-        <button id="sourceAlt" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded shadow">Source 2</button>
+      <!-- Right: Episode List -->
+      <div class="w-full md:w-64">
+        <h2 class="text-lg font-semibold mb-2">Episodes</h2>
+        <div id="episodeList" class="max-h-[600px] overflow-y-auto border rounded p-2 space-y-1 bg-gray-800 text-white"></div>
       </div>
-
-      <div id="animeDetails" class="text-sm text-gray-500 dark:text-gray-400 mt-2 hidden">
-        <p>Episode info and details will appear here.</p>
-      </div>
-    </section>
-
-    <aside class="md:col-span-1">
-      <h2 class="text-lg font-semibold mb-2">Episodes</h2>
-      <div id="episodeList" class="max-h-[80vh] overflow-y-auto space-y-2 pr-2">
-        <!-- Episodes will be injected here -->
-      </div>
-    </aside>
+    </div>
   </main>
 </body>
 </html>
