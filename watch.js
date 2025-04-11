@@ -1,8 +1,10 @@
 const urlParams = new URLSearchParams(window.location.search);
 const anilistId = parseInt(urlParams.get('id'));
 const type = (urlParams.get('type') || 'sub').toLowerCase();
+const episodeFromUrl = urlParams.get('ep');
 
 const videoPlayer = document.getElementById('videoPlayer');
+const placeholder = document.getElementById('placeholder');
 const episodeDropdown = document.getElementById('episodeDropdown');
 const playBtn = document.getElementById('playButton');
 const sourceContainer = document.getElementById('sourceButtons');
@@ -21,6 +23,9 @@ async function fetchMalId(anilistId) {
           english
           romaji
         }
+        coverImage {
+          large
+        }
       }
     }
   `;
@@ -33,6 +38,7 @@ async function fetchMalId(anilistId) {
   return {
     malId: data.data.Media.idMal,
     title: data.data.Media.title.english || data.data.Media.title.romaji,
+    cover: data.data.Media.coverImage.large
   };
 }
 
@@ -75,15 +81,9 @@ function renderDropdown(episodes) {
 }
 
 function updateVideoPlayer(url) {
-  const newIframe = document.createElement('iframe');
-  newIframe.id = 'videoPlayer';
-  newIframe.className = 'w-full h-full';
-  newIframe.src = url;
-  newIframe.allowFullscreen = true;
-  newIframe.frameBorder = 0;
-
-  const oldIframe = document.getElementById('videoPlayer');
-  oldIframe.parentNode.replaceChild(newIframe, oldIframe);
+  placeholder.classList.add('hidden');
+  videoPlayer.classList.remove('hidden');
+  videoPlayer.src = url;
 }
 
 function setVideo(ep, title) {
@@ -94,8 +94,15 @@ function setVideo(ep, title) {
   currentEpisode = ep;
 }
 
+function updateUrlWithEpisode(epNum) {
+  const newUrl = `${window.location.pathname}?id=${anilistId}&type=${type}&ep=${encodeURIComponent(epNum)}`;
+  window.history.pushState({}, '', newUrl);
+}
+
 async function init() {
-  const { malId, title } = await fetchMalId(anilistId);
+  const { malId, title, cover } = await fetchMalId(anilistId);
+  document.getElementById('placeholder').style.backgroundImage = `url(${cover})`;
+
   const response = await fetch('https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json');
   const data = await response.json();
   const animeEntry = data.find(entry => entry['data-mal-id'] === malId);
@@ -112,13 +119,23 @@ async function init() {
   }
 
   renderDropdown(episodes);
-  setVideo(episodes[0], title);
+
+  let autoPlayEp = null;
+  if (episodeFromUrl) {
+    autoPlayEp = episodes.find(e => e['data-ep-num'].toString() === episodeFromUrl);
+  }
+
+  if (autoPlayEp) {
+    episodeDropdown.value = autoPlayEp['data-ep-num'];
+    setVideo(autoPlayEp, title);
+  }
 
   playBtn.addEventListener('click', () => {
-    const selectedEpNum = parseInt(episodeDropdown.value);
-    const ep = episodes.find(e => e['data-ep-num'] === selectedEpNum);
+    const selectedEpNum = episodeDropdown.value;
+    const ep = episodes.find(e => e['data-ep-num'].toString() === selectedEpNum);
     if (ep) {
       setVideo(ep, title);
+      updateUrlWithEpisode(ep['data-ep-num']);
     }
   });
 }
