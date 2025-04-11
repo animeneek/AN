@@ -1,156 +1,154 @@
-const urlParams = new URLSearchParams(window.location.search);
-const anilistId = parseInt(urlParams.get('id'));
-const type = urlParams.get('type') || 'sub';
-const selectedEp = parseInt(urlParams.get('ep') || 0);
-const jsonURL = 'https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json';
+// watch.js
 
-const titleEl = document.getElementById('animeTitle');
-const videoPlayer = document.getElementById('videoPlayer');
-const posterImage = document.getElementById('posterImage');
-const videoContainer = document.getElementById('videoContainer');
-const episodeSelect = document.getElementById('episodeSelect');
-const playButton = document.getElementById('playButton');
-const sourceButtons = document.getElementById('sourceButtons');
-
-let currentAnimeData = null;
-let selectedEpisodeData = null;
-
-async function loadNav() {
-  const navHtml = await fetch('nav.html').then(res => res.text());
-  document.getElementById('nav-placeholder').innerHTML = navHtml;
-
-  const searchBox = document.getElementById('searchBox');
-  if (searchBox) {
-    searchBox.addEventListener('keypress', e => {
-      if (e.key === 'Enter') {
-        window.location.href = `search.html?q=${searchBox.value}`;
+document.addEventListener('DOMContentLoaded', () => {
+  // Load navigation bar
+  fetch('nav.html')
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById('nav-placeholder').innerHTML = data;
+      // Attach search functionality
+      const searchBox = document.getElementById('searchBox');
+      if (searchBox) {
+        searchBox.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            window.location.href = `search.html?q=${searchBox.value}`;
+          }
+        });
       }
     });
-  }
 
-  document.getElementById('toggleTheme')?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-  });
-}
+  const urlParams = new URLSearchParams(window.location.search);
+  const anilistId = parseInt(urlParams.get('id'));
+  const type = (urlParams.get('type') || 'sub').toLowerCase();
+  const epNum = parseInt(urlParams.get('ep'));
 
-async function getMalIdFromAnilist(anilistId) {
-  const query = `
-    query ($id: Int) {
-      Media(id: $id, type: ANIME) {
-        idMal
-        title {
-          romaji
-          english
-        }
-        coverImage {
-          large
-        }
-      }
-    }
-  `;
-  const variables = { id: anilistId };
-  const response = await fetch('https://graphql.anilist.co', {
+  const videoPlayer = document.getElementById('videoPlayer');
+  const animeTitleEl = document.getElementById('animeTitle');
+  const sourceButtonsContainer = document.getElementById('sourceButtons');
+  const episodeSelect = document.getElementById('episodeSelect');
+  const playButton = document.getElementById('playButton');
+  const posterOverlay = document.getElementById('posterOverlay');
+  const posterImage = document.getElementById('posterImage');
+
+  let episodeData = [];
+  let currentTitle = '';
+  let currentPoster = '';
+  let malId = null;
+
+  // Fetch MAL ID and anime details from Anilist
+  fetch('https://graphql.anilist.co', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables })
-  });
+    body: JSON.stringify({
+      query: `
+        query ($id: Int) {
+          Media(id: $id, type: ANIME) {
+            idMal
+            title {
+              romaji
+              english
+            }
+            coverImage {
+              large
+            }
+          }
+        }
+      `,
+      variables: { id: anilistId }
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const media = data.data.Media;
+      malId = media.idMal;
+      currentTitle = media.title.english || media.title.romaji;
+      currentPoster = media.coverImage.large;
 
-  const data = await response.json();
-  const media = data.data.Media;
-  const title = media.title.english || media.title.romaji;
-  titleEl.textContent = `Watch ${title} [${type.toUpperCase()}]${selectedEp ? ' - Episode ' + selectedEp : ''}`;
-  posterImage.src = media.coverImage.large;
-  return media.idMal;
-}
+      animeTitleEl.textContent = currentTitle + (epNum ? ` [${type.toUpperCase()}] - Episode ${epNum}` : ` [${type.toUpperCase()}]`);
+      posterImage.src = currentPoster;
 
-function generateEmbedUrls(data) {
-  const urls = [];
-  if (data['data-src'] === 'anime') {
-    urls.push(`//s3taku.one/watch?play=${data['data-video-id']}`);
-    urls.push(`//s3taku.one/watch?play=${data['data-video-id']}&sv=1`);
-  } else if (data['data-src'] === 'streamtape') {
-    urls.push(`//streamtape.com/e/${data['data-video-id']}`);
-  } else if (data['data-src'] === 'mp4upload') {
-    urls.push(`//mp4upload.com/v/${data['data-video-id']}`);
-  }
-  return urls;
-}
+      // Fetch episode data from JSON
+      return fetch('https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json');
+    })
+    .then(res => res.json())
+    .then(json => {
+      const animeEntry = json.find(entry => entry['data-mal-id'] === malId);
+      if (!animeEntry) {
+        animeTitleEl.textContent = 'No episodes found.';
+        return;
+      }
 
-function updateSources(urls) {
-  sourceButtons.innerHTML = '';
-  urls.forEach((url, i) => {
-    const btn = document.createElement('button');
-    btn.textContent = `Source ${i + 1}`;
-    btn.className = 'bg-primary text-white px-3 py-1 rounded shadow hover:bg-blue-700';
-    btn.addEventListener('click', () => {
-      videoPlayer.src = url;
+      episodeData = animeEntry.episodes.filter(ep => ep['data-ep-lan'].toLowerCase() === type);
+
+      // Populate episode dropdown
+      episodeSelect.innerHTML = '<option value="">Select Episode</option>';
+      episodeData.forEach(ep => {
+        const option = document.createElement('option');
+        option.value = ep['data-ep-num'];
+        option.textContent = `Episode ${ep['data-ep-num']}`;
+        episodeSelect.appendChild(option);
+      });
+
+      // Set selected episode if epNum is present
+      if (epNum) {
+        episodeSelect.value = epNum;
+        loadEpisode(epNum);
+      }
+
+      // Enable play button when an episode is selected
+      episodeSelect.addEventListener('change', () => {
+        playButton.disabled = !episodeSelect.value;
+      });
+
+      // Handle play button click
+      playButton.addEventListener('click', () => {
+        const selectedEp = parseInt(episodeSelect.value);
+        if (!selectedEp) return;
+        const newUrl = `watch.html?id=${anilistId}&type=${type}&ep=${selectedEp}`;
+        history.pushState(null, '', newUrl);
+        loadEpisode(selectedEp);
+      });
     });
-    sourceButtons.appendChild(btn);
-  });
-  sourceButtons.classList.remove('hidden');
-}
 
-function showVideo(embedUrl) {
-  posterImage.classList.add('hidden');
-  videoPlayer.classList.remove('hidden');
-  videoPlayer.src = embedUrl;
-}
+  function loadEpisode(epNumber) {
+    const episode = episodeData.find(ep => ep['data-ep-num'] === epNumber);
+    if (!episode) return;
 
-async function init() {
-  await loadNav();
-  const malId = await getMalIdFromAnilist(anilistId);
+    // Update title
+    animeTitleEl.textContent = `${currentTitle} [${type.toUpperCase()}] - Episode ${epNumber}`;
 
-  const jsonData = await fetch(jsonURL).then(res => res.json());
-  currentAnimeData = jsonData.find(entry => entry['data-mal-id'] === malId);
+    // Hide poster overlay
+    posterOverlay.style.display = 'none';
 
-  if (!currentAnimeData) return;
+    // Determine embed URLs based on data-src
+    const videoId = episode['data-video-id'];
+    const dataSrc = episode['data-src'];
+    let sources = [];
 
-  const episodes = currentAnimeData.episodes.filter(e => e['data-ep-lan'].toLowerCase() === type.toLowerCase());
-
-  episodes.forEach(ep => {
-    const option = document.createElement('option');
-    option.value = ep['data-ep-num'];
-    option.textContent = `Episode ${ep['data-ep-num']}`;
-    episodeSelect.appendChild(option);
-  });
-
-  episodeSelect.addEventListener('change', () => {
-    const selectedVal = episodeSelect.value;
-    if (!selectedVal) {
-      playButton.disabled = true;
-      playButton.classList.add('bg-gray-400', 'cursor-not-allowed');
-      playButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-      return;
+    if (dataSrc === 'anime') {
+      sources = [
+        `https://s3taku.one/watch?play=${videoId}`,
+        `https://s3taku.one/watch?play=${videoId}&sv=1`
+      ];
+    } else if (dataSrc === 'streamtape') {
+      sources = [`https://streamtape.com/e/${videoId}`];
+    } else if (dataSrc === 'mp4upload') {
+      sources = [`https://mp4upload.com/v/${videoId}`];
     }
 
-    playButton.disabled = false;
-    playButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
-    playButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
-  });
+    // Set default video source
+    videoPlayer.src = sources[0];
 
-  playButton.addEventListener('click', () => {
-    const epNum = parseInt(episodeSelect.value);
-    if (!epNum) return;
-
-    const epData = episodes.find(e => e['data-ep-num'] === epNum);
-    if (!epData) return;
-
-    selectedEpisodeData = epData;
-
-    const embedUrls = generateEmbedUrls(epData);
-    updateSources(embedUrls);
-    showVideo(embedUrls[0]);
-
-    const newUrl = `${window.location.pathname}?id=${anilistId}&type=${type}&ep=${epNum}`;
-    window.history.replaceState(null, '', newUrl);
-    titleEl.textContent += ` - Episode ${epNum}`;
-    episodeSelect.value = epNum;
-  });
-
-  if (selectedEp) {
-    episodeSelect.value = selectedEp;
-    playButton.click();
+    // Create source buttons
+    sourceButtonsContainer.innerHTML = '';
+    sources.forEach((src, index) => {
+      const btn = document.createElement('button');
+      btn.textContent = `Source ${index + 1}`;
+      btn.className = 'px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-sm mr-2';
+      btn.addEventListener('click', () => {
+        videoPlayer.src = src;
+      });
+      sourceButtonsContainer.appendChild(btn);
+    });
   }
-}
-
-document.addEventListener('DOMContentLoaded', init);
+});
