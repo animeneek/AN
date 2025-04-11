@@ -1,7 +1,7 @@
 // watch.js
 
 const urlParams = new URLSearchParams(window.location.search);
-const anilistId = parseInt(urlParams.get('id'));
+const anilistId = parseInt(urlParams.get('id'));  // AniList ID
 const type = (urlParams.get('type') || 'sub').toLowerCase();
 const selectedEpisode = parseInt(urlParams.get('ep'));
 
@@ -13,7 +13,7 @@ const playButton = document.getElementById('playButton');
 const posterImage = document.getElementById('posterImage');
 const posterOverlay = document.getElementById('posterOverlay');
 
-let malId = null;
+let malId = null;  // MyAnimeList ID
 let embedData = null;
 let animeTitle = '';
 let currentEpisodeData = null;
@@ -60,9 +60,9 @@ function updatePlayer(episodeData) {
 }
 
 // Fetch MyAnimeList ID using AniList ID
-function fetchMalId() {
+async function fetchMalId() {
   console.log('Fetching MyAnimeList ID for AniList ID:', anilistId);  // Debug log
-  return fetch('https://graphql.anilist.co', {
+  const response = await fetch('https://graphql.anilist.co', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -73,34 +73,30 @@ function fetchMalId() {
               romaji
               english
             }
-            idMal
+            idMal  // Fetching MyAnimeList ID
           }
         }
       `,
       variables: { id: anilistId }
     })
-  })
-    .then(res => res.json())
-    .then(data => {
-      malId = data.data.Media.idMal;
-      animeTitle = data.data.Media.title.english || data.data.Media.title.romaji;
-      console.log('Fetched Anime Title:', animeTitle); // Debug log
-      posterImage.src = `https://cdn.anilist.co/cover/${anilistId}.jpg`; // Set poster image
-    })
-    .catch(error => console.error('Error fetching AniList data:', error));  // Catch and log errors
+  });
+
+  const data = await response.json();
+  malId = data.data.Media.idMal;
+  animeTitle = data.data.Media.title.english || data.data.Media.title.romaji;
+  console.log('Fetched Anime Title:', animeTitle); // Debug log
+  posterImage.src = `https://cdn.anilist.co/cover/${anilistId}.jpg`; // Set poster image
 }
 
-// Load episode data from JSON
-function fetchEpisodeData() {
+// Load episode data from JSON based on MyAnimeList ID
+async function fetchEpisodeData() {
   console.log('Fetching episode data...');  // Debug log
-  return fetch('https://raw.githubusercontent.com/animeneek/anineek/main/animeneek.json')
-    .then(res => res.json())
-    .then(data => {
-      const match = data.find(anime => anime['data-mal-id'] === malId);
-      embedData = match ? match.episodes : [];
-      console.log('Fetched episode data:', embedData);  // Debug log
-    })
-    .catch(error => console.error('Error fetching episode data:', error));  // Catch and log errors
+  const response = await fetch('https://raw.githubusercontent.com/animeneek/anineek/main/animeneek.json');
+  const data = await response.json();
+
+  const match = data.find(anime => anime['data-mal-id'] === malId);
+  embedData = match ? match.episodes : [];
+  console.log('Fetched episode data:', embedData);  // Debug log
 }
 
 // Populate dropdown and set selected value if exists
@@ -155,7 +151,7 @@ document.getElementById('searchBox').addEventListener('keypress', e => {
 // Main execution
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Page loaded');  // Debug log
-  await fetchMalId();
-  await fetchEpisodeData();
-  populateEpisodeDropdown();
+  await fetchMalId();  // Get MyAnimeList ID and title
+  await fetchEpisodeData();  // Get episodes from JSON
+  populateEpisodeDropdown();  // Populate dropdown
 });
