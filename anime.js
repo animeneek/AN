@@ -110,19 +110,28 @@ async function getAvailableLanguages(malId) {
   }
 }
 
-function createWatchButtons(animeId, langs) {
+function createWatchButtons(animeId, availableLangs) {
   const langMap = {
-    sub: { color: 'blue', label: 'Sub' },
-    dub: { color: 'green', label: 'Dub' },
-    raw: { color: 'red', label: 'Raw' }
+    sub: { label: 'Sub', color: 'blue' },
+    dub: { label: 'Dub', color: 'green' },
+    raw: { label: 'Raw', color: 'red' }
   };
 
-  return langs.map(type => `
-    <a href="watch.html?id=${animeId}&type=${type}" 
-       class="px-4 py-2 rounded text-white bg-${langMap[type].color}-500 hover:bg-${langMap[type].color}-600 transition">
-      Watch ${langMap[type].label}
-    </a>
-  `).join('');
+  return ['sub', 'dub', 'raw'].map(type => {
+    const isActive = availableLangs.includes(type);
+    const style = isActive
+      ? `bg-${langMap[type].color}-500 hover:bg-${langMap[type].color}-600 text-white`
+      : `bg-gray-400 text-white cursor-not-allowed`;
+
+    const link = isActive ? `href="watch.html?id=${animeId}&type=${type}"` : '';
+
+    return `
+      <a ${link} 
+         class="px-4 py-2 rounded ${style} transition inline-block text-center" 
+         ${isActive ? '' : 'tabindex="-1" aria-disabled="true"'}>${langMap[type].label}
+      </a>
+    `;
+  }).join('');
 }
 
 function loadNav() {
