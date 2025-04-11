@@ -1,3 +1,4 @@
+<!-- watch.html -->
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -11,41 +12,26 @@
       darkMode: 'class',
       theme: {
         fontFamily: { sans: ['Poppins', 'sans-serif'] },
-        extend: {
-          colors: {
-            primary: '#1e293b',
-            danger: '#ff4444',
-          },
-        },
-      },
+        extend: { colors: { primary: '#1e293b' } }
+      }
     };
   </script>
+  <script defer src="app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="styles.css" />
   <script defer src="watch.js"></script>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-sans transition-colors duration-300">
   <div id="nav-placeholder"></div>
 
+
   <main class="max-w-5xl mx-auto p-4">
-    <h1 id="animeTitle" class="text-2xl font-semibold mb-4 text-center">Watch Episode</h1>
-
-    <!-- Video / Placeholder -->
-    <div class="aspect-video rounded overflow-hidden shadow mb-4 relative">
-      <img id="placeholderImage" src="" alt="Anime Poster" class="w-full h-full object-cover blur-sm absolute top-0 left-0 z-0" />
-      <div id="placeholderOverlay" class="absolute top-0 left-0 w-full h-full flex items-center justify-center z-10">
-        <p class="text-white text-xl md:text-2xl font-semibold text-center px-4">Select an Episode to Start Watching</p>
-      </div>
-      <iframe id="videoPlayer" class="w-full h-full z-20 relative hidden" src="" frameborder="0" allowfullscreen></iframe>
+    <h1 id="animeTitle" class="text-2xl font-semibold mb-4">Watch Episode</h1>
+    <div class="aspect-video rounded overflow-hidden shadow mb-4">
+      <iframe id="videoPlayer" class="w-full h-full" src="" frameborder="0" allowfullscreen></iframe>
     </div>
-
-    <!-- Source Buttons -->
-    <div id="sourceButtons" class="flex flex-wrap justify-center gap-3 mb-4"></div>
-
-    <!-- Episode Dropdown -->
-    <div class="flex flex-wrap justify-center items-center gap-2 mb-4">
-      <select id="episodeDropdown" class="px-4 py-2 rounded bg-gray-800 text-white"></select>
-      <button id="playButton" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded">Play</button>
+    <div class="text-sm text-gray-500 dark:text-gray-400">
+      <p>This is a placeholder embed. Replace the link logic later with your actual embed mapping.</p>
     </div>
   </main>
 </body>
