@@ -6,7 +6,6 @@ const videoPlayer = document.getElementById('videoPlayer');
 const episodeDropdown = document.getElementById('episodeDropdown');
 const playBtn = document.getElementById('playButton');
 const sourceContainer = document.getElementById('sourceButtons');
-const episodeListContainer = document.getElementById('episodeList');
 const episodeTitle = document.getElementById('animeTitle');
 
 let currentEpisode = null;
@@ -57,9 +56,9 @@ function renderSources(ep) {
   sources.forEach((src, idx) => {
     const btn = document.createElement('button');
     btn.textContent = `Source ${idx + 1}`;
-    btn.className = 'bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-1 rounded mr-2 mb-2';
+    btn.className = 'bg-[#ff4444] hover:bg-red-600 text-white font-semibold px-4 py-1 rounded mr-2 mb-2';
     btn.onclick = () => {
-      videoPlayer.src = src;
+      updateVideoPlayer(src);
     };
     sourceContainer.appendChild(btn);
   });
@@ -75,9 +74,21 @@ function renderDropdown(episodes) {
   });
 }
 
+function updateVideoPlayer(url) {
+  const newIframe = document.createElement('iframe');
+  newIframe.id = 'videoPlayer';
+  newIframe.className = 'w-full h-full';
+  newIframe.src = url;
+  newIframe.allowFullscreen = true;
+  newIframe.frameBorder = 0;
+
+  const oldIframe = document.getElementById('videoPlayer');
+  oldIframe.parentNode.replaceChild(newIframe, oldIframe);
+}
+
 function setVideo(ep, title) {
   const sources = getSources(ep);
-  videoPlayer.src = sources[0];
+  updateVideoPlayer(sources[0]);
   episodeTitle.textContent = `${title} - Episode ${ep['data-ep-num']} - ${ep['data-ep-lan']}`;
   renderSources(ep);
   currentEpisode = ep;
