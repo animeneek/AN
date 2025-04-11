@@ -1,4 +1,3 @@
-// watch.js
 document.addEventListener('DOMContentLoaded', () => {
   // Load nav.html into #nav-placeholder
   fetch("nav.html")
@@ -8,9 +7,45 @@ document.addEventListener('DOMContentLoaded', () => {
       setupThemeToggle();
       setupSearchHandler();
     });
-  
-  // Add more watch page-specific functionality here in the future
+
+  // Fetch URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const animeId = urlParams.get('id');
+  const type = urlParams.get('type') || 'sub';  // default to 'sub' if no type is provided
+
+  // Function to fetch the anime title from AniList using the animeId
+  fetchAnimeTitle(animeId, type);
 });
+
+// Function to fetch the anime title from AniList API
+function fetchAnimeTitle(animeId, type) {
+  const query = `
+    query ($id: Int) {
+      Media(id: $id, type: ANIME) {
+        title {
+          romaji
+          english
+        }
+      }
+    }
+  `;
+  const variables = {
+    id: parseInt(animeId)
+  };
+
+  fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const title = data.data.Media.title.english || data.data.Media.title.romaji;
+      // Set the title and type (e.g., "Horimiya [DUB]") in the <h1> tag
+      document.getElementById('animeTitle').textContent = `${title} [${type.toUpperCase()}]`;
+    })
+    .catch(err => console.error('Error fetching anime title:', err));
+}
 
 function setupThemeToggle() {
   const toggle = document.getElementById('toggleTheme');
