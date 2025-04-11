@@ -9,7 +9,9 @@ const player = document.getElementById('videoPlayer');
 const animeTitleElement = document.getElementById('animeTitle');
 const sourceButtonsContainer = document.getElementById('sourceButtons');
 const episodeSelect = document.getElementById('episodeSelect');
-const playButton = document.getElementById('playEpisode');
+const playButton = document.getElementById('playButton');
+const posterImage = document.getElementById('posterImage');
+const posterOverlay = document.getElementById('posterOverlay');
 
 let malId = null;
 let embedData = null;
@@ -81,6 +83,7 @@ function fetchMalId() {
     .then(data => {
       malId = data.data.Media.idMal;
       animeTitle = data.data.Media.title.english || data.data.Media.title.romaji;
+      posterImage.src = `https://cdn.anilist.co/cover/${anilistId}.jpg`; // Set poster image
     });
 }
 
@@ -115,10 +118,14 @@ function populateEpisodeDropdown() {
     if (episodeToPlay) {
       updatePlayer(episodeToPlay);
       animeTitleElement.textContent = `${animeTitle} [${type.toUpperCase()}] - Episode ${selectedEpisode}`;
+      posterOverlay.classList.add('hidden');
+      player.classList.remove('hidden');
     }
   } else {
     animeTitleElement.textContent = `${animeTitle} [${type.toUpperCase()}]`;
     player.src = ""; // Show default poster or keep iframe blank
+    posterOverlay.classList.remove('hidden');
+    player.classList.add('hidden');
   }
 }
 
