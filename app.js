@@ -113,7 +113,7 @@ function loadAnime(type = 'TRENDING') {
         const image = anime.coverImage?.extraLarge || 'assets/fallback.jpg';
         return `
           <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-[#222] rounded shadow hover:scale-105 transition overflow-hidden" data-aos="fade-up">
-            <img src="${image}" alt="${title}" class="w-full h-90 object-cover" />
+            <img src="${image}" alt="${title}" class="w-full h-[240px] object-cover rounded-t" />
             <div class="p-2 text-sm text-center font-semibold">${title}</div>
           </a>
         `;
