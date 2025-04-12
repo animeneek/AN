@@ -1,5 +1,5 @@
 const API_URL = 'https://graphql.anilist.co';
-const JSON_URL = 'https://raw.githubusercontent.com/animeneek/animeNeek/main/animeneek.json';
+const JSON_URL = 'https://raw.githubusercontent.com/animeneek/AnimeNeek/main/animeneek.json';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const navRes = await fetch('nav.html');
