@@ -121,11 +121,12 @@ function setupThemeToggle() {
   const html = document.documentElement;
   const storedTheme = localStorage.getItem('theme');
 
-  if (storedTheme === 'dark') {
+  if (!storedTheme || storedTheme === 'dark') {
     html.classList.add('dark');
   } else {
     html.classList.remove('dark');
   }
+
 
   if (toggle) {
     toggle.addEventListener('click', () => {
