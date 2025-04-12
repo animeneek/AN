@@ -39,12 +39,16 @@ function loadHeroSlider() {
         return `
           <div class="slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === 0 ? 'opacity-100 z-30' : 'opacity-0 z-10'}">
             <img src="${bgImage}" alt="${title}" class="w-full h-full object-cover object-center absolute inset-0" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+    
+            <!-- Full dark gradient overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent backdrop-blur-sm">
+
+              <!-- Content at bottom -->
               <div class="absolute bottom-0 left-0 w-full p-6 md:p-12">
-                <div class="backdrop-blur-md bg-black/60 p-4 md:p-6 rounded-lg max-h-[60vh] overflow-hidden">
-                  <h1 class="text-2xl md:text-4xl font-bold text-white mb-3">${title}</h1>
-                  <p class="text-sm text-white mb-2 italic">${genres}</p>
-                  <div class="text-white text-sm max-h-[140px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent">
+                <div class="p-4 md:p-6 max-h-[60vh] text-white">
+                  <h1 class="text-2xl md:text-4xl font-bold mb-3">${title}</h1>
+                  <p class="text-sm mb-2 italic">${genres}</p>
+                  <div class="text-sm max-h-[140px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent">
                     ${description}
                   </div>
                 </div>
