@@ -35,7 +35,7 @@ nav input[type="text"] {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
-  width: 60%; /*200px*/
+  width: 100%; /*200px*/
   max-width: 100%;
   outline: none;
 }
