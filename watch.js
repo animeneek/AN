@@ -1,25 +1,20 @@
 const API_URL = 'https://graphql.anilist.co';
-const MAL_MAPPING_API = 'https://api.consumet.org/meta/anilist/info/';
-const JSON_URL = 'https://raw.githubusercontent.com/animeneek/anineek/main/animeneek.json';
+const JSON_URL = 'https://raw.githubusercontent.com/animeneek/animeNeek/main/animeneek.json';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Load nav
   const navRes = await fetch('nav.html');
   const navHTML = await navRes.text();
   document.getElementById('nav-placeholder').innerHTML = navHTML;
   setupThemeToggle();
   setupSearchHandler();
 
-  // Get query params
   const params = new URLSearchParams(window.location.search);
   const anilistID = params.get('id');
   const type = params.get('type')?.toUpperCase() || 'SUB';
 
-  // Get MAL ID using AniList API
   const { malID, title } = await getMalAndTitle(anilistID);
   document.getElementById('animeTitle').textContent = `${title} [${type}]`;
 
-  // Load episode data from JSON
   const jsonData = await (await fetch(JSON_URL)).json();
   const animeEntry = jsonData.find(entry => entry['data-mal-id'] === malID);
 
@@ -61,16 +56,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       urls = [`https://streamtape.com/e/${videoId}`];
     } else if (src === 'mp4upload') {
       urls = [`https://mp4upload.com/v/${videoId}`];
+    } else if (src === 'URL') {
+      video.src = "https://raw.githubusercontent.com/animeneek/movneek/main/Assets/Images/BG_002.jpg";
+      return;
     } else {
-      // Unknown or direct URL - use fallback image
-      video.src = "https://github.com/animeneek/movneek/blob/main/Assets/Images/BG_001.jpg";
+      video.src = "https://raw.githubusercontent.com/animeneek/movneek/main/Assets/Images/BG_001.jpg";
       return;
     }
 
     // Auto play first source
     video.src = urls[0];
 
-    // Source buttons
     urls.forEach((url, i) => {
       const btn = document.createElement('button');
       btn.textContent = `Source ${i + 1}`;
@@ -82,7 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // --- Helper Functions ---
-
 async function getMalAndTitle(anilistID) {
   const query = `
     query ($id: Int) {
