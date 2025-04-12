@@ -14,7 +14,7 @@ body {
 
 /* -------------------- NAVBAR -------------------- */
 nav {
-  background-color: #222; /* Tailwind gray-800 */
+  background-color: black; /* Tailwind gray-800 */
   padding: 1rem 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
@@ -35,13 +35,13 @@ nav input[type="text"] {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   border: none;
-  width: 200px;
+  width: 60%; /*200px*/
   max-width: 100%;
   outline: none;
 }
 
 nav input[type="text"]:focus {
-  border: 2px solid #38bdf8; /* blue-400 */
+  border: 2px solid #ff4444; /* blue-400 */
 }
 
 /* -------------------- HERO / SLIDER -------------------- */
