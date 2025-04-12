@@ -1,4 +1,3 @@
-// app.js
 const API_URL = 'https://graphql.anilist.co';
 
 const tabButtons = document.querySelectorAll('.tab-btn');
@@ -47,7 +46,6 @@ function loadAnime(type = 'TRENDING') {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Load nav.html into #nav-placeholder
   fetch("nav.html")
     .then(response => response.text())
     .then(navData => {
@@ -56,23 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
       setupSearchHandler();
     });
 
-  // Load initial anime list
   loadAnime('TRENDING');
+  loadHeroSlider();
 
-  // Tab switching logic with active style handling
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      // Remove active styles from all
       tabButtons.forEach(b => {
         b.classList.remove('bg-[#ff4444]', 'text-white');
         b.classList.add('bg-transparent', 'text-black', 'dark:text-white');
       });
 
-      // Add active styles to clicked button
       btn.classList.remove('bg-transparent', 'text-black', 'dark:text-white');
       btn.classList.add('bg-[#ff4444]', 'text-white');
 
-      // Load new content
       loadAnime(btn.dataset.type);
     });
   });
@@ -87,7 +81,6 @@ function setupThemeToggle() {
     });
   }
 
-  // Set theme on first load
   if (localStorage.getItem('theme') === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
@@ -104,4 +97,70 @@ function setupSearchHandler() {
       }
     });
   }
+}
+
+// Hero Anime Slider
+function loadHeroSlider() {
+  const heroWrapper = document.getElementById('heroSwiperWrapper');
+
+  const query = `
+    query {
+      Page(perPage: 5) {
+        media(type: ANIME, sort: [POPULARITY_DESC]) {
+          title { romaji }
+          coverImage { extraLarge }
+          genres
+          description(asHtml: false)
+          averageScore
+        }
+      }
+    }
+  `;
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const animeList = data.data.Page.media;
+
+      heroWrapper.innerHTML = animeList.map(anime => `
+        <div class="swiper-slide relative">
+          <img src="${anime.coverImage.extraLarge}" alt="${anime.title.romaji}" class="absolute inset-0 w-full h-full object-cover" />
+        </div>
+      `).join('');
+
+      const titleEl = document.getElementById('sliderTitle');
+      const genresEl = document.getElementById('sliderGenres');
+      const infoEl = document.getElementById('sliderInfo');
+
+      const swiper = new Swiper(".mySwiper", {
+        loop: true,
+        effect: 'fade',
+        autoplay: {
+          delay: 4000,
+          disableOnInteraction: false,
+        },
+        fadeEffect: {
+          crossFade: true
+        },
+        on: {
+          slideChangeTransitionStart: function () {
+            const idx = swiper.realIndex;
+            const anime = animeList[idx];
+            titleEl.textContent = anime.title.romaji;
+            genresEl.textContent = anime.genres.slice(0, 3).join(', ');
+            infoEl.textContent = `Score: ${anime.averageScore} — ${anime.description?.replace(/<[^>]*>?/gm, '').slice(0, 150)}...`;
+          }
+        }
+      });
+
+      // Set first slide info initially
+      const firstAnime = animeList[0];
+      titleEl.textContent = firstAnime.title.romaji;
+      genresEl.textContent = firstAnime.genres.slice(0, 3).join(', ');
+      infoEl.textContent = `Score: ${firstAnime.averageScore} — ${firstAnime.description?.replace(/<[^>]*>?/gm, '').slice(0, 150)}...`;
+    });
 }
