@@ -12,15 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const anilistID = params.get('id');
   const type = params.get('type')?.toUpperCase() || 'SUB';
 
-  const { malID, title, coverImage } = await getMalAndTitle(anilistID);
-  document.getElementById('animeTitle').textContent = `${title} [${type}]`;
-
-  const placeholder = document.getElementById('placeholderOverlay');
-  placeholder.style.backgroundImage = `url(${coverImage})`;
-  placeholder.style.backgroundSize = 'cover';
+  const { malID, title, coverImage } = await getMalDetails(anilistID);
+  const titleEl = document.getElementById('animeTitle');
+  titleEl.textContent = `${title} [${type}]`;
 
   const jsonData = await (await fetch(JSON_URL)).json();
   const animeEntry = jsonData.find(entry => entry['data-mal-id'] === malID);
+
   const episodeList = animeEntry?.episodes?.filter(ep => ep['data-ep-lan'].toUpperCase() === type) || [];
   episodeList.sort((a, b) => a['data-ep-num'] - b['data-ep-num']);
 
@@ -28,6 +26,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const playButton = document.getElementById('playButton');
   const video = document.getElementById('videoPlayer');
   const sourceButtons = document.getElementById('sourceButtons');
+  const overlay = document.getElementById('placeholderOverlay');
+
+  if (coverImage) {
+    overlay.style.backgroundImage = `url('${coverImage}')`;
+    overlay.style.backgroundSize = 'cover';
+    overlay.style.backgroundPosition = 'center';
+  }
 
   episodeList.forEach(ep => {
     const option = document.createElement('option');
@@ -46,12 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const videoId = selectedEp['data-video-id'];
     const src = selectedEp['data-src'];
-    const episodeNum = selectedEp['data-ep-num'];
-
-    const displayTitle = `${title.toUpperCase()} [${type}] - Episode ${episodeNum}`;
-    document.getElementById('animeTitle').textContent = displayTitle;
-    document.title = displayTitle;
-
     sourceButtons.innerHTML = '';
 
     let urls = [];
@@ -66,17 +65,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (src === 'mp4upload') {
       urls = [`https://mp4upload.com/v/${videoId}`];
     } else if (src === 'URL') {
-      video.src = "https://raw.githubusercontent.com/animeneek/movneek/main/Assets/Images/BG_002.jpg";
-      placeholder.classList.add('hidden');
+      video.src = "https://github.com/animeneek/movneek/blob/main/Assets/Images/BG_002.jpg";
       return;
     } else {
-      video.src = "https://raw.githubusercontent.com/animeneek/movneek/main/Assets/Images/BG_001.jpg";
-      placeholder.classList.add('hidden');
+      video.src = "";
       return;
     }
 
-    // Remove placeholder and load video
-    placeholder.classList.add('hidden');
     video.src = urls[0];
 
     urls.forEach((url, i) => {
@@ -86,16 +81,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.addEventListener('click', () => video.src = url);
       sourceButtons.appendChild(btn);
     });
+
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+
+    document.getElementById('animeTitle').textContent = `${title} [${type}] - Episode ${selectedEp['data-ep-num']}`;
   });
 });
 
-async function getMalAndTitle(anilistID) {
+async function getMalDetails(anilistID) {
   const query = `
     query ($id: Int) {
       Media(id: $id, type: ANIME) {
         title { romaji }
         idMal
-        coverImage { large }
+        coverImage { extraLarge }
       }
     }
   `;
@@ -111,7 +112,7 @@ async function getMalAndTitle(anilistID) {
   return {
     malID: data?.data?.Media?.idMal,
     title: data?.data?.Media?.title?.romaji || "Unknown Title",
-    coverImage: data?.data?.Media?.coverImage?.large || ''
+    coverImage: data?.data?.Media?.coverImage?.extraLarge || ''
   };
 }
 
