@@ -1,11 +1,12 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AnimeNeek - v13.03</title>
+  <title>AnimeNeek</title>
   <link rel="icon" href="assets/favicon-image.png" />
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -22,22 +23,34 @@
       }
     }
   </script>
+
+  <!-- Fonts & Styles -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-  <script defer src="app.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Swiper.js (Anime Slider) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script defer src="app.js"></script>
 </head>
 <body class="bg-white dark:bg-[#222] text-gray-900 dark:text-white font-sans transition-colors duration-300">
 
   <div id="nav-placeholder"></div>
 
-
-  <!-- Hero Slider -->
-  <section class="relative h-[300px] md:h-[400px] bg-black">
-    <img src="assets/hero.jpg" alt="Hero Background" class="w-full h-full object-cover opacity-30">
-    <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-center px-4">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to AnimeNeek</h1>
-      <p class="max-w-xl text-gray-300">Explore trending, new, and top-rated anime with ease.</p>
+  <!-- Hero Anime Slider -->
+  <section class="relative h-[400px] md:h-[500px] overflow-hidden">
+    <div class="swiper mySwiper h-full">
+      <div class="swiper-wrapper" id="heroSwiperWrapper">
+        <!-- Slides injected via JS -->
+      </div>
+    </div>
+    <div class="absolute inset-0 bg-black/50 z-10"></div>
+    <div class="absolute inset-0 flex flex-col justify-center items-center z-20 text-center px-4">
+      <h1 id="sliderTitle" class="text-4xl md:text-5xl font-bold mb-3"></h1>
+      <p id="sliderGenres" class="text-sm md:text-base text-gray-300 mb-2"></p>
+      <p id="sliderInfo" class="max-w-2xl text-gray-400 text-sm md:text-base"></p>
     </div>
   </section>
 
@@ -46,10 +59,7 @@
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-2xl font-semibold text-black dark:text-white">Neek Picks</h2>
       <div class="space-x-2">
-        <!-- Active Button -->
         <button class="tab-btn px-4 py-1 rounded text-white bg-[#ff4444] hover:bg-[#ff5555]" data-type="TRENDING">Trending</button>
-
-        <!-- Inactive Buttons -->
         <button class="tab-btn px-4 py-1 rounded text-black dark:text-white bg-transparent hover:bg-[#ff5555]" data-type="POPULAR">Popular</button>
         <button class="tab-btn px-4 py-1 rounded text-black dark:text-white bg-transparent hover:bg-[#ff5555]" data-type="TOP">Top Rated</button>
       </div>
@@ -57,8 +67,6 @@
 
     <div id="animeSection" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4" data-aos="fade-up"></div>
   </div>
-
-
 
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>AOS.init();</script>
