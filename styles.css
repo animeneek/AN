@@ -71,6 +71,10 @@ nav input[type="text"]:focus {
   font-weight: 700;
 }
 
+.rounded {
+    border-radius: 0.75rem;
+}
+
 /* -------------------- SECTION HEADINGS -------------------- */
 h2 {
   font-size: 1.75rem;
