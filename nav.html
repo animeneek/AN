@@ -1,23 +1,25 @@
 <!-- nav.html -->
-<nav class="bg-gray-100 dark:bg-[#1c1c1c] shadow z-10 relative">
-  <div class="max-w-screen-xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+<nav class="flex justify-between items-center p-4 bg-gray-100 dark:bg-[#1c1c1c] shadow z-10 relative">
+  <!-- Logo aligned to the left -->
+  <div class="flex-1">
+    <a href="index.html" class="flex items-center">
+      <img src="assets/animeneek_Raider Crusader_001.png" alt="AnimeNeek Logo" class="h-10 mr-2">
+    </a>
+  </div>
 
-    <!-- LOGO (left on desktop, smaller on mobile) -->
-    <div class="flex justify-start sm:w-auto">
-      <a href="index.html" class="flex items-center">
-        <img src="assets/animeneek_Raider Crusader_001.png" alt="AnimeNeek Logo" class="h-8 sm:h-10">
-      </a>
-    </div>
+  <!-- Search box centered -->
+  <div class="flex-1 flex justify-center">
+    <input
+      type="text"
+      id="searchBox"
+      placeholder="Search anime..."
+      class="w-2/3 max-w-xl rounded px-4 py-2 text-white bg-[#222] focus:outline-none focus:ring-2 focus:ring-[#ff4444]"
+    />
+  </div>
 
-    <!-- SEARCH BOX (centered & wide) -->
-    <div class="w-full sm:flex-1 flex justify-center">
-      <input 
-        type="text" 
-        id="searchBox" 
-        placeholder="Search anime..."
-        class="w-full sm:w-[600px] px-4 py-2 rounded border border-white bg-white dark:bg-[#1c1c1c] text-black dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all"
-      />
-    </div>
-
+  <!-- Empty right space for balance -->
+  <div class="flex-1 flex justify-end items-center">
+    <!-- Optional theme toggle here -->
+    <!--button id="toggleTheme" class="text-sm px-3 py-1 rounded bg-gray-300 dark:bg-gray-700">🌗</button-->
   </div>
 </nav>
