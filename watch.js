@@ -37,13 +37,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     playButton.disabled = !select.value;
   });
 
-  playButton.addEventListener('click', () => {
-    const selectedEp = episodeList.find(ep => ep['data-ep-num'] == select.value);
-    if (!selectedEp) return;
+playButton.addEventListener('click', () => {
+  const selectedEp = episodeList.find(ep => ep['data-ep-num'] == select.value);
+  if (!selectedEp) return;
 
-    const videoId = selectedEp['data-video-id'];
-    const src = selectedEp['data-src'];
-    sourceButtons.innerHTML = '';
+  const videoId = selectedEp['data-video-id'];
+  const src = selectedEp['data-src'];
+  const episodeNum = selectedEp['data-ep-num'];
+
+  // Update title dynamically
+  const displayTitle = `${title.toUpperCase()} [${type}] - Episode ${episodeNum}`;
+  document.getElementById('animeTitle').textContent = displayTitle;
+  document.title = displayTitle;
+
+  sourceButtons.innerHTML = '';
 
     let urls = [];
 
