@@ -157,11 +157,13 @@ function setupThemeToggle() {
     });
   }
 
-  if (localStorage.getItem('theme') === 'dark') {
+  const savedTheme = localStorage.getItem('theme');
+  if (!savedTheme || savedTheme === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
   }
+
 }
 
 function setupSearchHandler() {
