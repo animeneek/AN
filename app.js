@@ -7,7 +7,7 @@ const heroContent = document.getElementById('heroContent');
 function loadHeroSlider() {
   const query = `
     query {
-      Page(perPage: 1) {
+      Page(perPage: 5) {
         media(type: ANIME, sort: TRENDING_DESC) {
           id
           title { romaji }
@@ -27,24 +27,46 @@ function loadHeroSlider() {
   })
     .then(res => res.json())
     .then(data => {
-      const anime = data.data.Page.media[0];
-      const bgImage = anime.bannerImage || anime.coverImage.extraLarge;
-      const genres = anime.genres?.slice(0, 3).join(', ') || '';
-      const title = anime.title.romaji || 'Untitled';
-      const description = anime.description || 'No description.';
+      const animeList = data.data.Page.media;
+      const sliderWrapper = document.getElementById('sliderWrapper');
 
-      heroContent.innerHTML = `
-        <div class="absolute inset-0">
-          <img src="${bgImage}" alt="${title}" class="w-full h-full object-cover object-center" />
-        </div>
-        <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-6 md:p-12">
-          <h1 class="text-3xl md:text-5xl font-bold text-white mb-3">${title}</h1>
-          <p class="text-sm text-white mb-2 italic">${genres}</p>
-          <p class="text-white text-sm max-w-3xl line-clamp-none">${description}</p>
-        </div>
-      `;
+      sliderWrapper.innerHTML = animeList.map((anime, index) => {
+        const bgImage = anime.bannerImage || anime.coverImage.extraLarge;
+        const genres = anime.genres?.slice(0, 3).join(', ') || '';
+        const title = anime.title.romaji || 'Untitled';
+        const description = anime.description || 'No description.';
+
+        return `
+          <div class="slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === 0 ? 'opacity-100 z-30' : 'opacity-0 z-10'}">
+            <img src="${bgImage}" alt="${title}" class="w-full h-full object-cover object-center absolute inset-0" />
+            <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-6 md:p-12">
+              <h1 class="text-3xl md:text-5xl font-bold text-white mb-3">${title}</h1>
+              <p class="text-sm text-white mb-2 italic">${genres}</p>
+              <p class="text-white text-sm max-w-3xl">${description}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      startSlider();
     });
 }
+
+function startSlider() {
+  const slides = document.querySelectorAll('.slide');
+  let currentIndex = 0;
+
+  setInterval(() => {
+    slides[currentIndex].classList.remove('opacity-100', 'z-30');
+    slides[currentIndex].classList.add('opacity-0', 'z-10');
+
+    currentIndex = (currentIndex + 1) % slides.length;
+
+    slides[currentIndex].classList.remove('opacity-0', 'z-10');
+    slides[currentIndex].classList.add('opacity-100', 'z-30');
+  }, 6000); // Slide every 6 seconds
+}
+
 
 function loadAnime(type = 'TRENDING') {
   animeSection.innerHTML = '<p class="col-span-full text-center text-gray-400">Loading...</p>';
