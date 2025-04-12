@@ -102,7 +102,7 @@ function fetchGenres() {
       if (!genreOptions) return;
 
       genreOptions.innerHTML = data.data.GenreCollection.map(genre => `
-        <label class="flex items-center space-x-2 text-sm text-black dark:text-white">
+        <label class="flex items-center space-x-2 text-sm text-white">
           <input type="checkbox" value="${genre}" class="genre-checkbox" />
           <span>${genre}</span>
         </label>
@@ -181,6 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('change', (e) => {
     if (e.target.classList.contains('genre-checkbox')) {
       selectedGenres = Array.from(document.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
+      const selectedGenresText = selectedGenres.length > 0 ? selectedGenres.join(', ') : 'Select Genres';
+      genreDropdownBtn.textContent = selectedGenresText;
       currentPage = 1;
       hasMoreResults = true;
       searchAnime(currentQuery, selectedGenres, 1, false);
