@@ -74,7 +74,7 @@ async function fetchAnimeDetails(id) {
     if (related.length > 0) {
       document.getElementById('relatedAnime').innerHTML = related.map(rel => `
         <a href="anime.html?id=${rel.node.id}" class="bg-gray-200 dark:bg-[#222] rounded overflow-hidden shadow hover:scale-105 transition">
-          <img src="${rel.node.coverImage.large}" alt="${rel.node.title.romaji}" class="w-full h-[240px] object-cover">
+          <img src="${rel.node.coverImage.large}" alt="${rel.node.title.romaji}" class="w-full h-[300px] object-cover">
           <div class="p-2 text-sm text-center">${rel.node.title.romaji}</div>
         </a>
       `).join('');
