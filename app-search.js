@@ -109,7 +109,7 @@ function searchAnime(query, genre = '', page = 1, append = false) {
         const title = anime.title?.romaji || 'Untitled';
         const image = anime.coverImage?.large || 'assets/fallback.jpg';
         return `
-          <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-gray-800 rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
+          <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-[#222] rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
             <div class="w-full aspect-[2/3] overflow-hidden">
               <img src="${image}" alt="${title}" class="w-full h-full object-cover" />
             </div>
