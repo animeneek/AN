@@ -12,9 +12,9 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
   isLoading = true;
 
   const gql = `
-    query ($search: String, $genre: [String], $tag: [String], $page: Int) {
+    query ($search: String, $genre: [String], $page: Int) {
       Page(page: $page, perPage: 30) {
-        media(search: $search, genre_in: $genre, tag_in: $tag, type: ANIME) {
+        media(search: $search, genre_in: $genre, type: ANIME) {
           id
           title { romaji }
           coverImage { large }
@@ -31,12 +31,13 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
 
   const variables = {
     search: query.trim() !== '' ? query : undefined,
-    genre: genres.length > 0 ? genres : undefined,
-    tag: tags.length > 0 ? tags : undefined,
+    genre: genres.length ? genres : undefined,
     page
   };
 
   const results = document.getElementById('results');
+  if (!results) return;
+
   if (!append) {
     results.innerHTML = '<p class="col-span-full text-center text-gray-500">Loading...</p>';
   }
@@ -54,7 +55,7 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
 
       const filteredMedia = media.filter(anime =>
         (genres.length === 0 || genres.every(g => anime.genres.includes(g))) &&
-        (tags.length === 0 || tags.every(t => anime.tags.some(tag => tag.name === t)))
+        (tags.length === 0 || tags.every(t => anime.tags.map(tag => tag.name).includes(t)))
       );
 
       if (!filteredMedia.length && !append) {
@@ -62,18 +63,14 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
         return;
       }
 
-      const cardsHTML = filteredMedia.map(anime => {
-        const title = anime.title?.romaji || 'Untitled';
-        const image = anime.coverImage?.large || 'assets/fallback.jpg';
-        return `
-          <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-[#222] rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
-            <div class="w-full aspect-[2/3] overflow-hidden">
-              <img src="${image}" alt="${title}" class="w-full h-full object-cover" />
-            </div>
-            <div class="p-2 text-sm text-center font-semibold">${title}</div>
-          </a>
-        `;
-      }).join('');
+      const cardsHTML = filteredMedia.map(anime => `
+        <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-[#222] rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
+          <div class="w-full aspect-[2/3] overflow-hidden">
+            <img src="${anime.coverImage?.large || 'assets/fallback.jpg'}" alt="${anime.title.romaji}" class="w-full h-full object-cover" />
+          </div>
+          <div class="p-2 text-sm text-center font-semibold">${anime.title.romaji}</div>
+        </a>
+      `).join('');
 
       if (append) {
         results.insertAdjacentHTML('beforeend', cardsHTML);
@@ -90,64 +87,72 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
     });
 }
 
-function fetchGenresAndTags() {
-  const query = `query {
-    GenreCollection
-    MediaTagCollection {
-      name
-      isGeneralSpoiler
-      isMediaSpoiler
-      isAdult
-    }
-  }`;
-
+function fetchGenres() {
   fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query })
+    body: JSON.stringify({ query: `query { GenreCollection }` })
   })
     .then(res => res.json())
     .then(data => {
       const genreOptions = document.getElementById('genreOptions');
-      const tagOptions = document.getElementById('tagOptions');
-
       genreOptions.innerHTML = data.data.GenreCollection.map(genre => `
         <label class="flex items-center space-x-2 text-sm text-white">
           <input type="checkbox" value="${genre}" class="genre-checkbox" />
           <span>${genre}</span>
         </label>
       `).join('');
+    });
+}
 
-      const tags = data.data.MediaTagCollection
-        .filter(tag => !tag.isAdult && !tag.isGeneralSpoiler && !tag.isMediaSpoiler);
-
+function fetchTags() {
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: `query { MediaTagCollection { name isAdult } }` })
+  })
+    .then(res => res.json())
+    .then(data => {
+      const tags = data.data.MediaTagCollection.filter(tag => !tag.isAdult);
+      const tagOptions = document.getElementById('tagOptions');
       tagOptions.innerHTML = tags.map(tag => `
         <label class="flex items-center space-x-2 text-sm text-white">
           <input type="checkbox" value="${tag.name}" class="tag-checkbox" />
           <span>${tag.name}</span>
         </label>
       `).join('');
-    })
-    .catch(err => {
-      console.error('Failed to load genres and tags:', err);
     });
 }
 
-function setupThemeToggle() {
-  const toggle = document.getElementById('toggleTheme');
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    });
-  }
+function setupDropdowns() {
+  const genreBtn = document.getElementById('genreDropdownBtn');
+  const genreDropdown = document.getElementById('genreDropdown');
+  const tagBtn = document.getElementById('tagDropdownBtn');
+  const tagDropdown = document.getElementById('tagDropdown');
 
-  const savedTheme = localStorage.getItem('theme');
-  if (!savedTheme || savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
+  genreBtn.addEventListener('click', () => genreDropdown.classList.toggle('hidden'));
+  tagBtn.addEventListener('click', () => tagDropdown.classList.toggle('hidden'));
+
+  document.addEventListener('click', (e) => {
+    if (!genreDropdown.contains(e.target) && e.target !== genreBtn) genreDropdown.classList.add('hidden');
+    if (!tagDropdown.contains(e.target) && e.target !== tagBtn) tagDropdown.classList.add('hidden');
+  });
+}
+
+function setupFilters() {
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('genre-checkbox')) {
+      selectedGenres = Array.from(document.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
+      document.getElementById('genreDropdownBtn').textContent = selectedGenres.length ? selectedGenres.join(', ') : 'Select Genres';
+    }
+    if (e.target.classList.contains('tag-checkbox')) {
+      selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
+      document.getElementById('tagDropdownBtn').textContent = selectedTags.length ? selectedTags.join(', ') : 'Select Tags';
+    }
+    currentPage = 1;
+    hasMoreResults = true;
+    searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
+  });
 }
 
 function setupSearchHandler() {
@@ -155,58 +160,37 @@ function setupSearchHandler() {
   if (searchBox) {
     searchBox.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
-        window.location.href = `search.html?q=${encodeURIComponent(searchBox.value)}`;
+        const newQuery = searchBox.value.trim();
+        if (newQuery) {
+          currentQuery = newQuery;
+          currentPage = 1;
+          hasMoreResults = true;
+          searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
+        }
       }
     });
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  fetchGenres();
+  fetchTags();
+  setupDropdowns();
+  setupFilters();
+  setupSearchHandler();
+
   const navPlaceholder = document.getElementById("nav-placeholder");
   if (navPlaceholder) {
     fetch("nav.html")
-      .then(response => response.text())
-      .then(navData => {
-        navPlaceholder.innerHTML = navData;
-        setupThemeToggle();
+      .then(res => res.text())
+      .then(html => {
+        navPlaceholder.innerHTML = html;
         setupSearchHandler();
       });
-  } else {
-    setupThemeToggle();
-    setupSearchHandler();
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  currentQuery = urlParams.get('q') || '';
-
-  fetchGenresAndTags();
-
-  const genreDropdownBtn = document.getElementById('genreDropdownBtn');
-  const genreDropdown = document.getElementById('genreDropdown');
-  genreDropdownBtn.addEventListener('click', () => genreDropdown.classList.toggle('hidden'));
-  document.addEventListener('click', e => {
-    if (!genreDropdown.contains(e.target) && e.target !== genreDropdownBtn) genreDropdown.classList.add('hidden');
-  });
-
-  const tagDropdownBtn = document.getElementById('tagDropdownBtn');
-  const tagDropdown = document.getElementById('tagDropdown');
-  tagDropdownBtn.addEventListener('click', () => tagDropdown.classList.toggle('hidden'));
-  document.addEventListener('click', e => {
-    if (!tagDropdown.contains(e.target) && e.target !== tagDropdownBtn) tagDropdown.classList.add('hidden');
-  });
-
-  document.addEventListener('change', e => {
-    if (e.target.classList.contains('genre-checkbox') || e.target.classList.contains('tag-checkbox')) {
-      selectedGenres = Array.from(document.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
-      selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
-      genreDropdownBtn.textContent = selectedGenres.length ? selectedGenres.join(', ') : 'Select Genres';
-      tagDropdownBtn.textContent = selectedTags.length ? selectedTags.join(', ') : 'Select Tags';
-      currentPage = 1;
-      hasMoreResults = true;
-      searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
-    }
-  });
-
+  const params = new URLSearchParams(window.location.search);
+  currentQuery = params.get('q') || '';
   searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
 
   window.addEventListener('scroll', () => {
