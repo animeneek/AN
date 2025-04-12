@@ -40,29 +40,29 @@
     <h2 class="text-2xl font-semibold mb-4">Search Results</h2>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0 mb-4">
+    <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 mb-4">
       <!-- Genre Filter -->
-      <div class="relative w-72">
+      <div class="relative w-full md:w-72">
         <label class="block mb-1 font-medium">Filter by Genre:</label>
-        <button id="genreDropdownBtn" class="bg-[#222] dark:bg-[#222] text-white px-4 py-2 rounded w-full text-left">
+        <button id="genreDropdownBtn" class="bg-[#222] text-white px-4 py-2 rounded w-full text-left">
           Select Genres
         </button>
-        <div id="genreDropdown" class="absolute z-10 mt-2 w-full bg-[#222] dark:bg-[#222] border border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
+        <div id="genreDropdown" class="absolute z-10 mt-2 w-full bg-[#222] border border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
           <div id="genreOptions" class="p-2 space-y-1">
-            <!-- Genres via JS -->
+            <!-- Genres populated by JS -->
           </div>
         </div>
       </div>
 
       <!-- Tag Filter -->
-      <div class="relative w-72">
+      <div class="relative w-full md:w-72">
         <label class="block mb-1 font-medium">Filter by Tags:</label>
-        <button id="tagDropdownBtn" class="bg-[#222] dark:bg-[#222] text-white px-4 py-2 rounded w-full text-left">
+        <button id="tagDropdownBtn" class="bg-[#222] text-white px-4 py-2 rounded w-full text-left">
           Select Tags
         </button>
-        <div id="tagDropdown" class="absolute z-10 mt-2 w-full bg-[#222] dark:bg-[#222] border border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
+        <div id="tagDropdown" class="absolute z-10 mt-2 w-full bg-[#222] border border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
           <div id="tagOptions" class="p-2 space-y-1">
-            <!-- Tags via JS -->
+            <!-- Tags populated by JS -->
           </div>
         </div>
       </div>
