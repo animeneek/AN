@@ -17,3 +17,24 @@
     />
   </div>
 </nav>
+
+<!-- JavaScript for both search boxes -->
+<script>
+  function handleSearchInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    input.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = input.value.trim();
+        if (query) {
+          window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+        }
+      }
+    });
+  }
+
+  handleSearchInput('searchBox');
+  handleSearchInput('searchBoxMobile');
+</script>
