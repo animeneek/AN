@@ -12,12 +12,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const anilistID = params.get('id');
   const type = params.get('type')?.toUpperCase() || 'SUB';
 
-  const { malID, title } = await getMalAndTitle(anilistID);
+  const { malID, title, coverImage } = await getMalAndTitle(anilistID);
   document.getElementById('animeTitle').textContent = `${title} [${type}]`;
+
+  const placeholder = document.getElementById('placeholderOverlay');
+  placeholder.style.backgroundImage = `url(${coverImage})`;
+  placeholder.style.backgroundSize = 'cover';
 
   const jsonData = await (await fetch(JSON_URL)).json();
   const animeEntry = jsonData.find(entry => entry['data-mal-id'] === malID);
-
   const episodeList = animeEntry?.episodes?.filter(ep => ep['data-ep-lan'].toUpperCase() === type) || [];
   episodeList.sort((a, b) => a['data-ep-num'] - b['data-ep-num']);
 
@@ -37,20 +40,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     playButton.disabled = !select.value;
   });
 
-playButton.addEventListener('click', () => {
-  const selectedEp = episodeList.find(ep => ep['data-ep-num'] == select.value);
-  if (!selectedEp) return;
+  playButton.addEventListener('click', () => {
+    const selectedEp = episodeList.find(ep => ep['data-ep-num'] == select.value);
+    if (!selectedEp) return;
 
-  const videoId = selectedEp['data-video-id'];
-  const src = selectedEp['data-src'];
-  const episodeNum = selectedEp['data-ep-num'];
+    const videoId = selectedEp['data-video-id'];
+    const src = selectedEp['data-src'];
+    const episodeNum = selectedEp['data-ep-num'];
 
-  // Update title dynamically
-  const displayTitle = `${title.toUpperCase()} [${type}] - Episode ${episodeNum}`;
-  document.getElementById('animeTitle').textContent = displayTitle;
-  document.title = displayTitle;
+    const displayTitle = `${title.toUpperCase()} [${type}] - Episode ${episodeNum}`;
+    document.getElementById('animeTitle').textContent = displayTitle;
+    document.title = displayTitle;
 
-  sourceButtons.innerHTML = '';
+    sourceButtons.innerHTML = '';
 
     let urls = [];
 
@@ -65,13 +67,16 @@ playButton.addEventListener('click', () => {
       urls = [`https://mp4upload.com/v/${videoId}`];
     } else if (src === 'URL') {
       video.src = "https://raw.githubusercontent.com/animeneek/movneek/main/Assets/Images/BG_002.jpg";
+      placeholder.classList.add('hidden');
       return;
     } else {
       video.src = "https://raw.githubusercontent.com/animeneek/movneek/main/Assets/Images/BG_001.jpg";
+      placeholder.classList.add('hidden');
       return;
     }
 
-    // Auto play first source
+    // Remove placeholder and load video
+    placeholder.classList.add('hidden');
     video.src = urls[0];
 
     urls.forEach((url, i) => {
@@ -84,13 +89,13 @@ playButton.addEventListener('click', () => {
   });
 });
 
-// --- Helper Functions ---
 async function getMalAndTitle(anilistID) {
   const query = `
     query ($id: Int) {
       Media(id: $id, type: ANIME) {
         title { romaji }
         idMal
+        coverImage { large }
       }
     }
   `;
@@ -105,7 +110,8 @@ async function getMalAndTitle(anilistID) {
   const data = await res.json();
   return {
     malID: data?.data?.Media?.idMal,
-    title: data?.data?.Media?.title?.romaji || "Unknown Title"
+    title: data?.data?.Media?.title?.romaji || "Unknown Title",
+    coverImage: data?.data?.Media?.coverImage?.large || ''
   };
 }
 
