@@ -39,13 +39,16 @@ function loadHeroSlider() {
         return `
           <div class="slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === 0 ? 'opacity-100 z-30' : 'opacity-0 z-10'}">
             <img src="${bgImage}" alt="${title}" class="w-full h-full object-cover object-center absolute inset-0" />
-            <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-6 md:p-12">
-              <h1 class="text-3xl md:text-5xl font-bold text-white mb-3">${title}</h1>
-              <p class="text-sm text-white mb-2 italic">${genres}</p>
-              <p class="text-white text-sm max-w-3xl">${description}</p>
-            </div>
+        <div class="backdrop-blur-sm bg-black/50 p-4 rounded-lg max-h-[80%] overflow-hidden">
+          <h1 class="text-3xl md:text-5xl font-bold text-white mb-3">${title}</h1>
+          <p class="text-sm text-white mb-2 italic">${genres}</p>
+          <div class="text-white text-sm max-h-[150px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-transparent">
+            ${description}
           </div>
-        `;
+        </div>
+      </div>
+    </div>
+  `;
       }).join('');
 
       startSlider();
