@@ -1,28 +1,27 @@
 <!-- nav.html -->
-<nav class="relative bg-gray-100 dark:bg-black shadow z-10 px-4 py-3 flex items-center justify-between">
-  <!-- Logo on the left -->
-  <div class="flex-shrink-0">
+<nav class="relative bg-gray-100 dark:bg-black shadow z-10 px-4 py-3 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+  <!-- Logo (centered on mobile, left on desktop) -->
+  <div class="flex-shrink-0 flex justify-center sm:justify-start w-full sm:w-auto">
     <a href="index.html" class="flex items-center">
-      <!-- Adjust the logo size for mobile using sm:h-8 and h-10 for larger screens -->
       <img src="assets/animeneek_Raider Crusader_001.png" alt="AnimeNeek Logo" class="h-4 sm:h-10">
     </a>
   </div>
 
-  <!-- Centered Search Box (adjusted for mobile) -->
-  <div class="hidden sm:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[60%] max-w-2xl">
+  <!-- Search box (centered and below logo on mobile) -->
+  <div class="w-full sm:hidden px-2">
     <input 
       type="text" 
-      id="searchBox" 
+      id="searchBoxMobile" 
       placeholder="Search anime..." 
       class="w-full px-5 py-2 rounded border border-white bg-gray-100 dark:bg-[#222] text-black dark:text-white focus:ring-2 focus:ring-[#ff4444] focus:border-[#ff4444] outline-none transition-all duration-200"
     />
   </div>
-  
-  <!-- On mobile, search box below the logo -->
-  <div class="sm:hidden w-full">
+
+  <!-- Desktop search box (unchanged, stays centered absolutely) -->
+  <div class="hidden sm:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[60%] max-w-2xl">
     <input 
       type="text" 
-      id="searchBoxMobile" 
+      id="searchBox" 
       placeholder="Search anime..." 
       class="w-full px-5 py-2 rounded border border-white bg-gray-100 dark:bg-[#222] text-black dark:text-white focus:ring-2 focus:ring-[#ff4444] focus:border-[#ff4444] outline-none transition-all duration-200"
     />
