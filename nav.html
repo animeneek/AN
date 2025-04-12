@@ -7,18 +7,8 @@
     </a>
   </div>
 
-  <!-- Search box (mobile view) -->
-  <div class="w-full sm:hidden px-2">
-    <input 
-      type="text" 
-      id="searchBoxMobile"  
-      placeholder="Search anime..." 
-      class="w-full px-5 py-2 rounded border border-white bg-gray-100 dark:bg-[#222] text-black dark:text-white focus:ring-2 focus:ring-[#ff4444] focus:border-[#ff4444] outline-none transition-all duration-200"
-    />
-  </div>
-
-  <!-- Desktop search box (centered) -->
-  <div class="hidden sm:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[60%] max-w-2xl">
+  <!-- Single Search box (responsive layout for mobile and desktop) -->
+  <div class="w-full sm:absolute sm:left-1/2 sm:top-1/2 sm:transform sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[60%] max-w-2xl px-2 sm:px-0">
     <input 
       type="text" 
       id="searchBox" 
@@ -27,26 +17,3 @@
     />
   </div>
 </nav>
-
-<!-- JavaScript for handling search -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    function setupSearchBox(id) {
-      const input = document.getElementById(id);
-      if (!input) return;
-
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const query = input.value.trim();
-          if (query) {
-            window.location.href = `search.html?q=${encodeURIComponent(query)}`;
-          }
-        }
-      });
-    }
-
-    setupSearchBox('searchBox');
-    setupSearchBox('searchBoxMobile');
-  });
-</script>
