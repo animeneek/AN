@@ -5,53 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AnimeNeek</title>
   <link rel="icon" href="assets/favicon-image.png" />
-
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
-        fontFamily: {
-          sans: ['Poppins', 'sans-serif'],
-        },
-        extend: {
-          colors: {
-            primary: '#1e293b'
-          }
-        }
+        fontFamily: { sans: ['Poppins', 'sans-serif'] },
+        extend: { colors: { primary: '#1e293b' } }
       }
-    }
+    };
   </script>
-
-  <!-- Fonts & Styles -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-
-  <!-- Swiper.js (Anime Slider) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
   <script defer src="app.js"></script>
 </head>
 <body class="bg-white dark:bg-[#222] text-gray-900 dark:text-white font-sans transition-colors duration-300">
 
   <div id="nav-placeholder"></div>
 
-  <!-- Hero Anime Slider -->
-  <section class="relative h-[400px] md:h-[500px] overflow-hidden">
-    <div class="swiper mySwiper h-full">
-      <div class="swiper-wrapper" id="heroSwiperWrapper">
-        <!-- Slides injected via JS -->
-      </div>
-    </div>
-    <div class="absolute inset-0 bg-black/50 z-10"></div>
-    <div class="absolute inset-0 flex flex-col justify-center items-center z-20 text-center px-4">
-      <h1 id="sliderTitle" class="text-4xl md:text-5xl font-bold mb-3"></h1>
-      <p id="sliderGenres" class="text-sm md:text-base text-gray-300 mb-2"></p>
-      <p id="sliderInfo" class="max-w-2xl text-gray-400 text-sm md:text-base"></p>
-    </div>
+  <!-- Hero Slider -->
+  <section id="heroSlider" class="relative h-[400px] md:h-[500px] overflow-hidden bg-black">
+    <div id="heroContent" class="w-full h-full relative z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 z-20"></div>
+    <div class="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-black to-transparent z-30"></div>
   </section>
 
   <!-- Anime Sections -->
