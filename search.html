@@ -26,10 +26,10 @@
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <style>
-  /* Custom checkbox styles */
-  input.genre-checkbox:checked {
-    accent-color: #ff4444;
-  }
+    input.genre-checkbox:checked,
+    input.tag-checkbox:checked {
+      accent-color: #ff4444;
+    }
   </style>
 </head>
 <body class="bg-white dark:bg-black text-gray-900 dark:text-white font-sans transition-colors duration-300">
@@ -39,16 +39,25 @@
   <div class="p-4 max-w-screen-xl mx-auto">
     <h2 class="text-2xl font-semibold mb-4">Search Results</h2>
 
-    <!-- Genre Dropdown Filter -->
+    <!-- Genre Filter -->
     <div class="mb-4 relative w-72">
       <label class="block mb-1 font-medium">Filter by Genre:</label>
       <button id="genreDropdownBtn" class="bg-[#222] dark:bg-[#222] text-white px-4 py-2 rounded w-full text-left">
         Select Genres
       </button>
-      <div id="genreDropdown" class="absolute z-10 mt-2 w-full bg-[#222] dark:bg-[#222] border border-gray-300 dark:border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
-        <div id="genreOptions" class="p-2 space-y-1">
-          <!-- Genre checkboxes inserted by JS -->
-        </div>
+      <div id="genreDropdown" class="absolute z-10 mt-2 w-full bg-[#222] border border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
+        <div id="genreOptions" class="p-2 space-y-1"></div>
+      </div>
+    </div>
+
+    <!-- Tag Filter -->
+    <div class="mb-6 relative w-72">
+      <label class="block mb-1 font-medium">Filter by Tags:</label>
+      <button id="tagDropdownBtn" class="bg-[#222] dark:bg-[#222] text-white px-4 py-2 rounded w-full text-left">
+        Select Tags
+      </button>
+      <div id="tagDropdown" class="absolute z-10 mt-2 w-full bg-[#222] border border-gray-700 rounded shadow-lg hidden max-h-60 overflow-y-auto">
+        <div id="tagOptions" class="p-2 space-y-1"></div>
       </div>
     </div>
 
