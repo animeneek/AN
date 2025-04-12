@@ -3,9 +3,9 @@ const API_URL = 'https://graphql.anilist.co';
 let currentPage = 1;
 let isLoading = false;
 let hasMoreResults = true;
+let currentQuery = '';
 let selectedGenres = [];
 let selectedTags = [];
-let currentQuery = '';
 
 function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
   if (isLoading || !hasMoreResults) return;
@@ -37,8 +37,6 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
   };
 
   const results = document.getElementById('results');
-  if (!results) return;
-
   if (!append) {
     results.innerHTML = '<p class="col-span-full text-center text-gray-500">Loading...</p>';
   }
@@ -54,12 +52,10 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
       hasMoreResults = data.data.Page.pageInfo.hasNextPage;
       currentPage = data.data.Page.pageInfo.currentPage + 1;
 
-      const filteredMedia = media.filter(anime => {
-        const hasAllGenres = genres.every(g => anime.genres.includes(g));
-        const tagNames = anime.tags.map(t => t.name);
-        const hasAllTags = tags.every(t => tagNames.includes(t));
-        return hasAllGenres && hasAllTags;
-      });
+      const filteredMedia = media.filter(anime =>
+        (genres.length === 0 || genres.every(g => anime.genres.includes(g))) &&
+        (tags.length === 0 || tags.every(t => anime.tags.some(tag => tag.name === t)))
+      );
 
       if (!filteredMedia.length && !append) {
         results.innerHTML = '<p class="col-span-full text-center text-gray-400">No results found.</p>';
@@ -95,7 +91,15 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
 }
 
 function fetchGenresAndTags() {
-  const query = `query { GenreCollection TagCollection }`;
+  const query = `query {
+    GenreCollection
+    MediaTagCollection {
+      name
+      isGeneralSpoiler
+      isMediaSpoiler
+      isAdult
+    }
+  }`;
 
   fetch(API_URL, {
     method: 'POST',
@@ -106,25 +110,27 @@ function fetchGenresAndTags() {
     .then(data => {
       const genreOptions = document.getElementById('genreOptions');
       const tagOptions = document.getElementById('tagOptions');
-      if (genreOptions) {
-        genreOptions.innerHTML = data.data.GenreCollection.map(genre => `
-          <label class="flex items-center space-x-2 text-sm text-white">
-            <input type="checkbox" value="${genre}" class="genre-checkbox" />
-            <span>${genre}</span>
-          </label>
-        `).join('');
-      }
 
-      if (tagOptions) {
-        tagOptions.innerHTML = data.data.TagCollection.map(tag => `
-          <label class="flex items-center space-x-2 text-sm text-white">
-            <input type="checkbox" value="${tag}" class="tag-checkbox" />
-            <span>${tag}</span>
-          </label>
-        `).join('');
-      }
+      genreOptions.innerHTML = data.data.GenreCollection.map(genre => `
+        <label class="flex items-center space-x-2 text-sm text-white">
+          <input type="checkbox" value="${genre}" class="genre-checkbox" />
+          <span>${genre}</span>
+        </label>
+      `).join('');
+
+      const tags = data.data.MediaTagCollection
+        .filter(tag => !tag.isAdult && !tag.isGeneralSpoiler && !tag.isMediaSpoiler);
+
+      tagOptions.innerHTML = tags.map(tag => `
+        <label class="flex items-center space-x-2 text-sm text-white">
+          <input type="checkbox" value="${tag.name}" class="tag-checkbox" />
+          <span>${tag.name}</span>
+        </label>
+      `).join('');
     })
-    .catch(err => console.error('Failed to load genres and tags:', err));
+    .catch(err => {
+      console.error('Failed to load genres and tags:', err);
+    });
 }
 
 function setupThemeToggle() {
@@ -149,10 +155,7 @@ function setupSearchHandler() {
   if (searchBox) {
     searchBox.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
-        currentQuery = searchBox.value;
-        currentPage = 1;
-        hasMoreResults = true;
-        searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
+        window.location.href = `search.html?q=${encodeURIComponent(searchBox.value)}`;
       }
     });
   }
@@ -180,34 +183,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const genreDropdownBtn = document.getElementById('genreDropdownBtn');
   const genreDropdown = document.getElementById('genreDropdown');
+  genreDropdownBtn.addEventListener('click', () => genreDropdown.classList.toggle('hidden'));
+  document.addEventListener('click', e => {
+    if (!genreDropdown.contains(e.target) && e.target !== genreDropdownBtn) genreDropdown.classList.add('hidden');
+  });
+
   const tagDropdownBtn = document.getElementById('tagDropdownBtn');
   const tagDropdown = document.getElementById('tagDropdown');
+  tagDropdownBtn.addEventListener('click', () => tagDropdown.classList.toggle('hidden'));
+  document.addEventListener('click', e => {
+    if (!tagDropdown.contains(e.target) && e.target !== tagDropdownBtn) tagDropdown.classList.add('hidden');
+  });
 
-  if (genreDropdownBtn && genreDropdown) {
-    genreDropdownBtn.addEventListener('click', () => genreDropdown.classList.toggle('hidden'));
-    document.addEventListener('click', (e) => {
-      if (!genreDropdown.contains(e.target) && e.target !== genreDropdownBtn) {
-        genreDropdown.classList.add('hidden');
-      }
-    });
-  }
-
-  if (tagDropdownBtn && tagDropdown) {
-    tagDropdownBtn.addEventListener('click', () => tagDropdown.classList.toggle('hidden'));
-    document.addEventListener('click', (e) => {
-      if (!tagDropdown.contains(e.target) && e.target !== tagDropdownBtn) {
-        tagDropdown.classList.add('hidden');
-      }
-    });
-  }
-
-  document.addEventListener('change', (e) => {
+  document.addEventListener('change', e => {
     if (e.target.classList.contains('genre-checkbox') || e.target.classList.contains('tag-checkbox')) {
       selectedGenres = Array.from(document.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
       selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
       genreDropdownBtn.textContent = selectedGenres.length ? selectedGenres.join(', ') : 'Select Genres';
       tagDropdownBtn.textContent = selectedTags.length ? selectedTags.join(', ') : 'Select Tags';
-
       currentPage = 1;
       hasMoreResults = true;
       searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
