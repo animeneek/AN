@@ -37,11 +37,12 @@ function loadHeroSlider() {
         const description = anime.description || 'No description.';
 
         return `
-          <a href="anime.html?id=${anime.id}" class="slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === 0 ? 'opacity-100 z-30' : 'opacity-0 z-10'}">
+          <div class="slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === 0 ? 'opacity-100 z-30' : 'opacity-0 z-10'}">
             <img src="${bgImage}" alt="${title}" class="w-full h-full object-cover object-center absolute inset-0" />
-
+    
             <!-- Full dark gradient overlay -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent backdrop-blur-sm">
+
               <!-- Content at bottom -->
               <div class="absolute bottom-0 left-0 w-full p-6 md:p-12">
                 <div class="p-4 md:p-6 max-h-[60vh] text-white">
@@ -53,8 +54,9 @@ function loadHeroSlider() {
                 </div>
               </div>
             </div>
-          </a>
+          </div>
         `;
+
       }).join('');
 
       startSlider();
@@ -75,6 +77,7 @@ function startSlider() {
     slides[currentIndex].classList.add('opacity-100', 'z-30');
   }, 6000); // Slide every 6 seconds
 }
+
 
 function loadAnime(type = 'TRENDING') {
   animeSection.innerHTML = '<p class="col-span-full text-center text-gray-400">Loading...</p>';
@@ -160,6 +163,7 @@ function setupThemeToggle() {
   } else {
     document.documentElement.classList.remove('dark');
   }
+
 }
 
 function setupSearchHandler() {
