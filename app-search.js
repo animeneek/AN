@@ -11,7 +11,7 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
   if (isLoading || !hasMoreResults) return;
   isLoading = true;
 
-  const gql = `
+  const gql = 
     query ($search: String, $genre: [String], $page: Int) {
       Page(page: $page, perPage: 30) {
         media(search: $search, genre_in: $genre, type: ANIME) {
@@ -27,10 +27,10 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
         }
       }
     }
-  `;
+  ;
 
   const variables = {
-    search: query.trim() !== '' ? query : undefined,  // <--- allow undefined (fetch all)
+    search: query.trim() !== '' ? query : undefined,
     genre: genres.length ? genres : undefined,
     page
   };
@@ -63,14 +63,14 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
         return;
       }
 
-      const cardsHTML = filteredMedia.map(anime => `
+      const cardsHTML = filteredMedia.map(anime => 
         <a href="anime.html?id=${anime.id}" class="bg-gray-100 dark:bg-[#222] rounded shadow hover:scale-105 transition transform duration-200 overflow-hidden" data-aos="fade-up">
           <div class="w-full aspect-[2/3] overflow-hidden">
             <img src="${anime.coverImage?.large || 'assets/fallback.jpg'}" alt="${anime.title.romaji}" class="w-full h-full object-cover" />
           </div>
           <div class="p-2 text-sm text-center font-semibold">${anime.title.romaji}</div>
         </a>
-      `).join('');
+      ).join('');
 
       if (append) {
         results.insertAdjacentHTML('beforeend', cardsHTML);
@@ -91,17 +91,17 @@ function fetchGenres() {
   fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: `query { GenreCollection }` })
+    body: JSON.stringify({ query: query { GenreCollection } })
   })
     .then(res => res.json())
     .then(data => {
       const genreOptions = document.getElementById('genreOptions');
-      genreOptions.innerHTML = data.data.GenreCollection.map(genre => `
+      genreOptions.innerHTML = data.data.GenreCollection.map(genre => 
         <label class="flex items-center space-x-2 text-sm text-white">
           <input type="checkbox" value="${genre}" class="genre-checkbox" />
           <span>${genre}</span>
         </label>
-      `).join('');
+      ).join('');
     });
 }
 
@@ -109,18 +109,18 @@ function fetchTags() {
   fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: `query { MediaTagCollection { name isAdult } }` })
+    body: JSON.stringify({ query: query { MediaTagCollection { name isAdult } } })
   })
     .then(res => res.json())
     .then(data => {
       const tags = data.data.MediaTagCollection.filter(tag => !tag.isAdult);
       const tagOptions = document.getElementById('tagOptions');
-      tagOptions.innerHTML = tags.map(tag => `
+      tagOptions.innerHTML = tags.map(tag => 
         <label class="flex items-center space-x-2 text-sm text-white">
           <input type="checkbox" value="${tag.name}" class="tag-checkbox" />
           <span>${tag.name}</span>
         </label>
-      `).join('');
+      ).join('');
     });
 }
 
@@ -161,10 +161,12 @@ function setupSearchHandler() {
     searchBox.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const newQuery = searchBox.value.trim();
-        currentQuery = newQuery; // ✅ allow empty string
-        currentPage = 1;
-        hasMoreResults = true;
-        searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
+        if (newQuery) {
+          currentQuery = newQuery;
+          currentPage = 1;
+          hasMoreResults = true;
+          searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
+        }
       }
     });
   }
