@@ -30,7 +30,7 @@ function searchAnime(query, genres = [], tags = [], page = 1, append = false) {
   `;
 
   const variables = {
-    search: query.trim() !== '' ? query : undefined,
+    search: query.trim() !== '' ? query : undefined,  // <--- allow undefined (fetch all)
     genre: genres.length ? genres : undefined,
     page
   };
@@ -161,12 +161,10 @@ function setupSearchHandler() {
     searchBox.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const newQuery = searchBox.value.trim();
-        if (newQuery) {
-          currentQuery = newQuery;
-          currentPage = 1;
-          hasMoreResults = true;
-          searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
-        }
+        currentQuery = newQuery; // ✅ allow empty string
+        currentPage = 1;
+        hasMoreResults = true;
+        searchAnime(currentQuery, selectedGenres, selectedTags, 1, false);
       }
     });
   }
