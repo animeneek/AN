@@ -41,18 +41,54 @@
         background: transparent;
       }
     }
+
+    /* Smooth scrollbar hiding workaround for mobile */
+    .scrollbar-thin {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+
+    /* Fix sliders horizontal padding & margin */
+    .slider-container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      overflow-x: auto;
+      display: flex;
+      gap: 1rem;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Responsive heading */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      border-bottom: 2px solid #444;
+      padding-bottom: 0.25rem;
+      font-size: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .section-heading {
+        font-size: 1.25rem;
+      }
+      .section-heading i {
+        font-size: 1.25rem;
+      }
+    }
   </style>
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
 
   <div id="header"></div>
 
-  <main class="flex-grow max-w-7xl mx-auto px-4 py-6 space-y-10">
+  <main class="flex-grow max-w-[1400px] mx-auto px-4 py-6 space-y-10">
     
     <!-- Continue Watching -->
     <section>
-      <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-1">Continue Watching</h2>
-      <div id="continue-watching" class="flex space-x-4 overflow-x-auto scroll-smooth touch-pan-x">
+      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-history"></i> Continue Watching</h2>
+      <div id="continue-watching" class="slider-container">
         <!-- Filled dynamically -->
       </div>
     </section>
@@ -60,10 +96,12 @@
     <!-- Trending -->
     <section>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-semibold border-b border-gray-700 pb-1">Trending</h2>
-        <a href="trending.html" class="text-[#ff4444] hover:underline text-sm font-medium">View More &rarr;</a>
+        <h2 class="section-heading text-[#ff4444]"><i class="fas fa-fire"></i> Trending</h2>
+        <a href="trending.html" class="text-[#ff4444] hover:underline text-sm font-medium flex items-center gap-1">
+          View More <i class="fas fa-chevron-right"></i>
+        </a>
       </div>
-      <div id="trending" class="flex space-x-4 overflow-x-auto scroll-smooth touch-pan-x">
+      <div id="trending" class="slider-container">
         <!-- Filled dynamically -->
       </div>
     </section>
@@ -71,10 +109,12 @@
     <!-- Newly Added -->
     <section>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-semibold border-b border-gray-700 pb-1">Newly Added</h2>
-        <a href="newlyadded.html" class="text-[#ff4444] hover:underline text-sm font-medium">View More &rarr;</a>
+        <h2 class="section-heading text-[#ff4444]"><i class="fas fa-plus-circle"></i> Newly Added</h2>
+        <a href="newlyadded.html" class="text-[#ff4444] hover:underline text-sm font-medium flex items-center gap-1">
+          View More <i class="fas fa-chevron-right"></i>
+        </a>
       </div>
-      <div id="newly-added" class="flex space-x-4 overflow-x-auto scroll-smooth touch-pan-x">
+      <div id="newly-added" class="slider-container">
         <!-- Filled dynamically -->
       </div>
     </section>
@@ -84,9 +124,28 @@
   <div id="footer"></div>
 
   <script>
-    // Load header/footer
-    fetch("header.html").then(res => res.text()).then(html => document.getElementById("header").innerHTML = html);
-    fetch("footer.html").then(res => res.text()).then(html => document.getElementById("footer").innerHTML = html);
+    // Load header/footer, then initialize page scripts
+    async function loadPartials() {
+      const headerHTML = await fetch("header.html").then(res => res.text());
+      document.getElementById("header").innerHTML = headerHTML;
+
+      const footerHTML = await fetch("footer.html").then(res => res.text());
+      document.getElementById("footer").innerHTML = footerHTML;
+
+      setupMobileMenuToggle();
+      await init();
+    }
+
+    // Fix hamburger toggle for mobile menu
+    function setupMobileMenuToggle() {
+      const btn = document.getElementById("menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      if (btn && menu) {
+        btn.addEventListener("click", () => {
+          menu.classList.toggle("hidden");
+        });
+      }
+    }
 
     // Helper: Create anime card
     function createAnimeCard(anime) {
@@ -193,7 +252,7 @@
       });
     }
 
-    init();
+    loadPartials();
   </script>
 
 </body>
