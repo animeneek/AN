@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AnimeNeek - Home</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/favicon-image.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    /* Hide native scrollbar */
+    #continue-watching::-webkit-scrollbar,
+    #trending::-webkit-scrollbar,
+    #newly-added::-webkit-scrollbar {
+      display: none;
+    }
+    #continue-watching,
+    #trending,
+    #newly-added {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+
+    /* Custom scrollbar for desktop hover devices */
+    @media (hover: hover) and (pointer: fine) {
+      #continue-watching::-webkit-scrollbar,
+      #trending::-webkit-scrollbar,
+      #newly-added::-webkit-scrollbar {
+        display: block;
+        height: 6px;
+      }
+      #continue-watching::-webkit-scrollbar-thumb,
+      #trending::-webkit-scrollbar-thumb,
+      #newly-added::-webkit-scrollbar-thumb {
+        background-color: #ff4444;
+        border-radius: 10px;
+      }
+      #continue-watching::-webkit-scrollbar-track,
+      #trending::-webkit-scrollbar-track,
+      #newly-added::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col">
+
+  <div id="header"></div>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 py-6 space-y-10">
+    
+    <!-- Continue Watching -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-1">Continue Watching</h2>
+      <div id="continue-watching" class="flex space-x-4 overflow-x-auto scroll-smooth touch-pan-x">
+        <!-- Filled dynamically -->
+      </div>
+    </section>
+
+    <!-- Trending -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-semibold border-b border-gray-700 pb-1">Trending</h2>
+        <a href="trending.html" class="text-[#ff4444] hover:underline text-sm font-medium">View More &rarr;</a>
+      </div>
+      <div id="trending" class="flex space-x-4 overflow-x-auto scroll-smooth touch-pan-x">
+        <!-- Filled dynamically -->
+      </div>
+    </section>
+
+    <!-- Newly Added -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-semibold border-b border-gray-700 pb-1">Newly Added</h2>
+        <a href="newlyadded.html" class="text-[#ff4444] hover:underline text-sm font-medium">View More &rarr;</a>
+      </div>
+      <div id="newly-added" class="flex space-x-4 overflow-x-auto scroll-smooth touch-pan-x">
+        <!-- Filled dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <div id="footer"></div>
+
+  <script>
+    // Load header/footer
+    fetch("header.html").then(res => res.text()).then(html => document.getElementById("header").innerHTML = html);
+    fetch("footer.html").then(res => res.text()).then(html => document.getElementById("footer").innerHTML = html);
+
+    // Helper: Create anime card
+    function createAnimeCard(anime) {
+      const card = document.createElement('a');
+      card.href = `anime.html?id=${anime.id}`;
+      card.className = 'min-w-[120px] sm:min-w-[140px] md:min-w-[180px] bg-black/60 rounded-lg overflow-hidden shadow-lg hover:shadow-[#ff4444] transition-shadow duration-300 flex-shrink-0';
+
+      card.innerHTML = `
+        <div class="relative aspect-[2/3] w-full overflow-hidden rounded-t-lg">
+          <img src="${anime.coverImage.large}" alt="${anime.title.english || anime.title.romaji}" class="object-cover w-full h-full transition-transform duration-300 hover:scale-105" loading="lazy" />
+          <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2">
+            <h3 class="text-white text-sm font-semibold truncate">${anime.title.english || anime.title.romaji}</h3>
+          </div>
+        </div>
+      `;
+      return card;
+    }
+
+    // Fetch Trending from AniList GraphQL
+    async function fetchTrending() {
+      const query = `
+        query {
+          Page(page:1, perPage:12) {
+            media(sort: TRENDING_DESC, type: ANIME) {
+              id
+              title { romaji english }
+              coverImage { large }
+            }
+          }
+        }
+      `;
+      const res = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+      return data.data.Page.media;
+    }
+
+    // Dummy function for newly added (simulate by recent start date)
+    async function fetchNewlyAdded() {
+      const query = `
+        query {
+          Page(page:1, perPage:12) {
+            media(sort: START_DATE_DESC, type: ANIME) {
+              id
+              title { romaji english }
+              coverImage { large }
+            }
+          }
+        }
+      `;
+      const res = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+      return data.data.Page.media;
+    }
+
+    // Load Continue Watching from localStorage (mockup)
+    function loadContinueWatching() {
+      const container = document.getElementById('continue-watching');
+      const saved = JSON.parse(localStorage.getItem('continueWatching') || '[]');
+
+      if(saved.length === 0){
+        container.innerHTML = `<p class="text-gray-400 italic">No continue watching items yet.</p>`;
+        return;
+      }
+
+      saved.forEach(anime => {
+        const card = document.createElement('a');
+        card.href = `anime.html?id=${anime.id}`;
+        card.className = 'min-w-[120px] sm:min-w-[140px] md:min-w-[180px] bg-black/60 rounded-lg overflow-hidden shadow-lg hover:shadow-[#ff4444] transition-shadow duration-300 flex-shrink-0';
+
+        card.innerHTML = `
+          <div class="relative aspect-[2/3] w-full overflow-hidden rounded-t-lg">
+            <img src="${anime.coverImage}" alt="${anime.title}" class="object-cover w-full h-full transition-transform duration-300 hover:scale-105" loading="lazy" />
+            <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2">
+              <h3 class="text-white text-sm font-semibold truncate">${anime.title}</h3>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // On page load
+    async function init() {
+      loadContinueWatching();
+
+      const trending = await fetchTrending();
+      const trendingContainer = document.getElementById('trending');
+      trending.forEach(anime => {
+        trendingContainer.appendChild(createAnimeCard(anime));
+      });
+
+      const newlyAdded = await fetchNewlyAdded();
+      const newlyAddedContainer = document.getElementById('newly-added');
+      newlyAdded.forEach(anime => {
+        newlyAddedContainer.appendChild(createAnimeCard(anime));
+      });
+    }
+
+    init();
+  </script>
+
+</body>
+</html>
