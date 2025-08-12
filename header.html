@@ -4,8 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <header class="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
-  <!-- Top Row -->
-  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+  <div class="max-w-[1400px] mx-auto px-4 h-14 flex items-center justify-between">
     
     <!-- Logo -->
     <a href="index.html" class="flex items-center">
@@ -13,7 +12,7 @@
     </a>
 
     <!-- Desktop Search -->
-    <form action="search.html" method="GET" class="hidden md:block relative w-full max-w-md">
+    <form action="search.html" method="GET" class="hidden md:block relative w-full max-w-md mx-4">
       <input 
         type="text" 
         name="q" 
@@ -31,7 +30,7 @@
     </nav>
 
     <!-- Mobile Menu Button -->
-    <button id="menu-btn" class="md:hidden text-gray-300 hover:text-white">
+    <button id="menu-btn" class="md:hidden text-gray-300 hover:text-white focus:outline-none" aria-label="Open menu">
       <i class="fas fa-bars fa-lg"></i>
     </button>
   </div>
@@ -58,9 +57,3 @@
     </div>
   </div>
 </header>
-
-<script>
-document.getElementById("menu-btn").addEventListener("click", () => {
-  document.getElementById("mobile-menu").classList.toggle("hidden");
-});
-</script>
