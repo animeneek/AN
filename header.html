@@ -3,35 +3,64 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-<header class="bg-black/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+<header class="bg-black text-white sticky top-0 z-50 border-b border-gray-800">
+  <!-- Top Row -->
+  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
     
     <!-- Logo -->
     <a href="index.html" class="flex items-center">
-      <img src="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/animeneek_haiku_002.png" alt="AnimeNeek Logo" class="h-10 w-auto">
+      <img src="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/animeneek_haiku_002.png" alt="AnimeNeek Logo" class="h-8 w-auto">
     </a>
 
-    <!-- Search -->
-    <div class="flex-1 mx-6">
-      <form action="search.html" method="GET" class="flex">
-        <input 
-          type="text" 
-          name="q" 
-          placeholder="Search anime..." 
-          class="flex-1 px-4 py-2 rounded-l-full bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:border-[#ff4444]"
-        >
-        <button type="submit" class="px-4 py-2 bg-[#ff4444] hover:bg-red-600 text-white rounded-r-full">
-          <i class="fas fa-search fa-sm"></i>
-        </button>
-      </form>
-    </div>
+    <!-- Desktop Search -->
+    <form action="search.html" method="GET" class="hidden md:block relative w-full max-w-md">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Search anime..." 
+        class="w-full pl-9 pr-3 py-1.5 text-sm rounded-full bg-gray-900 border border-gray-700 placeholder-gray-500 focus:outline-none focus:border-[#ff4444] transition"
+      >
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+    </form>
 
-    <!-- Navigation -->
-    <nav class="hidden md:flex space-x-6">
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:flex space-x-6 text-sm">
       <a href="index.html" class="text-gray-300 hover:text-[#ff4444] transition">Home</a>
       <a href="trending.html" class="text-gray-300 hover:text-[#ff4444] transition">Trending</a>
-      <a href="search.html" class="text-gray-300 hover:text-[#ff4444] transition">Search</a>
       <a href="#" class="text-gray-300 hover:text-[#ff4444] transition">My List</a>
     </nav>
+
+    <!-- Mobile Menu Button -->
+    <button id="menu-btn" class="md:hidden text-gray-300 hover:text-white">
+      <i class="fas fa-bars fa-lg"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Search (always visible) -->
+  <div class="md:hidden px-4 py-2 border-t border-gray-800 bg-black">
+    <form action="search.html" method="GET" class="relative">
+      <input 
+        type="text" 
+        name="q" 
+        placeholder="Search anime..." 
+        class="w-full pl-9 pr-3 py-2 text-sm rounded-full bg-gray-900 border border-gray-700 placeholder-gray-500 focus:outline-none focus:border-[#ff4444] transition"
+      >
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+    </form>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-800 bg-black">
+    <div class="p-4 flex flex-col space-y-3">
+      <a href="index.html" class="text-gray-300 hover:text-[#ff4444] transition">Home</a>
+      <a href="trending.html" class="text-gray-300 hover:text-[#ff4444] transition">Trending</a>
+      <a href="#" class="text-gray-300 hover:text-[#ff4444] transition">My List</a>
+    </div>
   </div>
 </header>
+
+<script>
+document.getElementById("menu-btn").addEventListener("click", () => {
+  document.getElementById("mobile-menu").classList.toggle("hidden");
+});
+</script>
