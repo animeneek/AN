@@ -1,0 +1,20 @@
+<!-- footer.html -->
+<footer class="bg-black border-t border-gray-800">
+  <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
+    <!-- Left Text -->
+    <p class="mb-3 md:mb-0 select-none">
+      © <span id="year"></span> AnimeNeek. All rights reserved.
+    </p>
+
+    <!-- Right Links -->
+    <div class="flex space-x-6">
+      <a href="#" class="hover:text-[#ff4444] transition">Privacy Policy</a>
+      <a href="#" class="hover:text-[#ff4444] transition">Terms of Service</a>
+      <a href="#" class="hover:text-[#ff4444] transition">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
