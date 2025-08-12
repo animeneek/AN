@@ -8,6 +8,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
+    /* Global box-sizing */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+
     /* Hide native scrollbar */
     #continue-watching::-webkit-scrollbar,
     #trending::-webkit-scrollbar,
@@ -42,13 +56,7 @@
       }
     }
 
-    /* Smooth scrollbar hiding workaround for mobile */
-    .scrollbar-thin {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
-    }
-
-    /* Fix sliders horizontal padding & margin */
+    /* Slider container fixes */
     .slider-container {
       padding-left: 1rem;
       padding-right: 1rem;
@@ -57,9 +65,10 @@
       gap: 1rem;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
+      width: 100%;
     }
 
-    /* Responsive heading */
+    /* Responsive section heading */
     .section-heading {
       display: flex;
       align-items: center;
@@ -68,6 +77,7 @@
       border-bottom: 2px solid #444;
       padding-bottom: 0.25rem;
       font-size: 1.5rem;
+      color: #ff4444;
     }
     @media (max-width: 768px) {
       .section-heading {
@@ -77,17 +87,34 @@
         font-size: 1.25rem;
       }
     }
+
+    /* Slider card sizes */
+    a.min-w-[120px] {
+      flex-shrink: 0;
+      min-width: 120px;
+    }
+    @media (min-width: 640px) {
+      a.min-w-[140px] {
+        min-width: 140px;
+      }
+    }
+    @media (min-width: 768px) {
+      a.min-w-[180px] {
+        min-width: 180px;
+      }
+    }
   </style>
 </head>
-<body class="bg-black text-white min-h-screen flex flex-col">
+<body class="flex flex-col min-h-screen">
 
   <div id="header"></div>
 
-  <main class="flex-grow max-w-[1400px] mx-auto px-4 py-6 space-y-10">
-    
+  <!-- Use Tailwind container class for responsive width -->
+  <main class="flex-grow space-y-10 container mx-auto px-4 py-6 max-w-screen-xl">
+
     <!-- Continue Watching -->
     <section>
-      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-history"></i> Continue Watching</h2>
+      <h2 class="section-heading"><i class="fas fa-history"></i> Continue Watching</h2>
       <div id="continue-watching" class="slider-container">
         <!-- Filled dynamically -->
       </div>
@@ -96,7 +123,7 @@
     <!-- Trending -->
     <section>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="section-heading text-[#ff4444]"><i class="fas fa-fire"></i> Trending</h2>
+        <h2 class="section-heading"><i class="fas fa-fire"></i> Trending</h2>
         <a href="trending.html" class="text-[#ff4444] hover:underline text-sm font-medium flex items-center gap-1">
           View More <i class="fas fa-chevron-right"></i>
         </a>
@@ -109,7 +136,7 @@
     <!-- Newly Added -->
     <section>
       <div class="flex items-center justify-between mb-4">
-        <h2 class="section-heading text-[#ff4444]"><i class="fas fa-plus-circle"></i> Newly Added</h2>
+        <h2 class="section-heading"><i class="fas fa-plus-circle"></i> Newly Added</h2>
         <a href="newlyadded.html" class="text-[#ff4444] hover:underline text-sm font-medium flex items-center gap-1">
           View More <i class="fas fa-chevron-right"></i>
         </a>
@@ -186,7 +213,7 @@
       return data.data.Page.media;
     }
 
-    // Dummy function for newly added (simulate by recent start date)
+    // Fetch Newly Added from AniList GraphQL
     async function fetchNewlyAdded() {
       const query = `
         query {
