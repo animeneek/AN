@@ -8,36 +8,38 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
-    .section-heading {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      border-bottom: 2px solid #444;
-      padding-bottom: 0.25rem;
-      font-size: 1.5rem;
+    body {
+      overflow-x: hidden;
     }
-    @media (max-width: 768px) {
-      .section-heading {
-        font-size: 1.25rem;
-      }
-      .section-heading i {
-        font-size: 1.25rem;
-      }
+    /* Fixed poster size */
+    .poster-img {
+      width: 100%;
+      height: 420px;
+      object-fit: cover;
+      border-radius: 0.5rem;
     }
-    .slider-container {
-      padding-left: 1rem;
-      padding-right: 1rem;
-      overflow-x: auto;
-      display: flex;
-      gap: 1rem;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
+    /* Episode card styling */
+    .episode-card {
+      min-width: 90px;
+      max-width: 90px;
+      flex: 0 0 auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .slider-container::-webkit-scrollbar {
+    .episode-card:hover {
+      background: rgba(255, 68, 68, 0.2);
+    }
+    /* Scrollbar hide for episode slider */
+    .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
-    .slider-container {
+    .no-scrollbar {
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
@@ -45,162 +47,200 @@
 </head>
 <body class="bg-black text-white min-h-screen flex flex-col">
 
-  <div id="header"></div>
+<div id="header"></div>
 
-  <main class="flex-grow max-w-[1400px] mx-auto px-4 py-6 space-y-10">
+<main class="flex-grow max-w-[1400px] mx-auto px-4 py-6 space-y-10">
 
-    <!-- Anime Hero -->
-    <section id="anime-hero" class="relative rounded-lg overflow-hidden">
-      <div id="hero-bg" class="absolute inset-0 bg-black/70"></div>
-      <div class="relative z-10 flex flex-col md:flex-row gap-6 p-6">
-        <img id="anime-poster" class="w-48 md:w-60 rounded-lg shadow-lg flex-shrink-0" alt="Anime Poster" />
-        <div>
-          <h1 id="anime-title" class="text-3xl md:text-4xl font-bold text-[#ff4444] mb-2"></h1>
-          <p id="anime-genres" class="text-gray-300 text-sm mb-4"></p>
-          <p id="anime-info" class="text-gray-400 text-sm mb-6"></p>
-          <p id="anime-description" class="text-gray-200 leading-relaxed"></p>
+  <!-- Anime details -->
+  <section id="anime-details" class="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
+    <div>
+      <img id="anime-poster" class="poster-img" src="" alt="Poster">
+    </div>
+    <div>
+      <h1 id="anime-title" class="text-3xl font-bold text-[#ff4444] mb-2"></h1>
+      <p id="anime-synopsis" class="text-gray-300 text-sm leading-relaxed"></p>
+    </div>
+  </section>
+
+  <!-- Episodes -->
+  <section>
+    <h2 class="flex items-center gap-2 text-[#ff4444] font-semibold border-b border-gray-700 pb-2 mb-4">
+      <i class="fas fa-list"></i> Episodes
+    </h2>
+    <div id="episodes-list" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+      <!-- Episodes inserted here -->
+    </div>
+  </section>
+
+  <!-- Overview -->
+  <section>
+    <h2 class="flex items-center gap-2 text-[#ff4444] font-semibold border-b border-gray-700 pb-2 mb-4">
+      <i class="fas fa-info-circle"></i> Overview
+    </h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Relations -->
+      <div>
+        <h3 class="text-lg font-semibold mb-3">Relations</h3>
+        <div id="relations" class="flex flex-wrap gap-3">
+          <!-- Relations inserted here -->
         </div>
       </div>
-    </section>
-
-    <!-- Episodes -->
-    <section>
-      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-list"></i> Episodes</h2>
-      <div id="episodes-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
-        <!-- Episodes will load here -->
-      </div>
-    </section>
-
-    <!-- Recommendations -->
-    <section>
-      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-star"></i> Recommended</h2>
-      <div id="recommended" class="slider-container mt-4">
-        <!-- Recommended anime will load here -->
-      </div>
-    </section>
-
-  </main>
-
-  <div id="footer"></div>
-
-  <script>
-    async function loadPartials() {
-      const headerHTML = await fetch("header.html").then(res => res.text());
-      document.getElementById("header").innerHTML = headerHTML;
-
-      const footerHTML = await fetch("footer.html").then(res => res.text());
-      document.getElementById("footer").innerHTML = footerHTML;
-
-      setupMobileMenuToggle();
-      await initAnimePage();
-    }
-
-    function setupMobileMenuToggle() {
-      const btn = document.getElementById("menu-btn");
-      const menu = document.getElementById("mobile-menu");
-      if (btn && menu) {
-        btn.addEventListener("click", () => {
-          menu.classList.toggle("hidden");
-        });
-      }
-    }
-
-    function getQueryParam(name) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(name);
-    }
-
-    function createAnimeCard(anime) {
-      const card = document.createElement('a');
-      card.href = `anime.html?id=${anime.id}`;
-      card.className = 'min-w-[140px] md:min-w-[180px] bg-black/60 rounded-lg overflow-hidden shadow-lg hover:shadow-[#ff4444] transition-shadow duration-300 flex-shrink-0';
-      card.innerHTML = `
-        <div class="relative aspect-[2/3] w-full overflow-hidden">
-          <img src="${anime.coverImage.large}" alt="${anime.title.english || anime.title.romaji}" class="object-cover w-full h-full transition-transform duration-300 hover:scale-105" />
-          <div class="absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2">
-            <h3 class="text-white text-sm font-semibold truncate">${anime.title.english || anime.title.romaji}</h3>
-          </div>
+      <!-- Characters -->
+      <div>
+        <h3 class="text-lg font-semibold mb-3">Main Characters</h3>
+        <div id="characters" class="flex flex-wrap gap-4">
+          <!-- Characters inserted here -->
         </div>
-      `;
-      return card;
-    }
+      </div>
+    </div>
+  </section>
 
-    async function initAnimePage() {
-      const animeId = getQueryParam('id');
-      if (!animeId) {
-        document.querySelector('main').innerHTML = '<p class="text-center text-gray-400">No anime selected.</p>';
-        return;
-      }
+  <!-- Recommendations -->
+  <section>
+    <h2 class="flex items-center gap-2 text-[#ff4444] font-semibold border-b border-gray-700 pb-2 mb-4">
+      <i class="fas fa-thumbs-up"></i> Recommendations
+    </h2>
+    <div id="recommendations" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+      <!-- Recs inserted here -->
+    </div>
+  </section>
 
-      // Fetch Anime Details + Recommendations
-      const query = `
-        query ($id: Int) {
-          Media(id: $id, type: ANIME) {
-            id
-            title { romaji english }
-            genres
-            description(asHtml: false)
-            coverImage { large extraLarge }
-            bannerImage
-            averageScore
-            seasonYear
-            episodes
-            recommendations(page: 1, perPage: 10) {
-              nodes {
-                mediaRecommendation {
-                  id
-                  title { romaji english }
-                  coverImage { large }
-                }
-              }
-            }
+</main>
+
+<div id="footer"></div>
+
+<script>
+async function loadPartials() {
+  const headerHTML = await fetch("header.html").then(res => res.text());
+  document.getElementById("header").innerHTML = headerHTML;
+
+  const footerHTML = await fetch("footer.html").then(res => res.text());
+  document.getElementById("footer").innerHTML = footerHTML;
+
+  setupMobileMenuToggle();
+  await init();
+}
+
+function setupMobileMenuToggle() {
+  const btn = document.getElementById("menu-btn");
+  const menu = document.getElementById("mobile-menu");
+  if (btn && menu) {
+    btn.addEventListener("click", () => {
+      menu.classList.toggle("hidden");
+    });
+  }
+}
+
+function getQueryParam(param) {
+  return new URLSearchParams(window.location.search).get(param);
+}
+
+function createAnimeCard(anime) {
+  const card = document.createElement('a');
+  card.href = `anime.html?id=${anime.id}`;
+  card.className = 'min-w-[140px] bg-black/60 rounded-lg overflow-hidden shadow-lg hover:shadow-[#ff4444] transition-shadow duration-300 flex-shrink-0';
+  card.innerHTML = `
+    <div class="relative aspect-[2/3] w-full overflow-hidden">
+      <img src="${anime.coverImage.large}" alt="${anime.title.english || anime.title.romaji}" class="object-cover w-full h-full" />
+    </div>
+  `;
+  return card;
+}
+
+async function init() {
+  const id = getQueryParam("id");
+  if (!id) return;
+
+  // Fetch anime details from AniList
+  const query = `
+    query ($id: Int) {
+      Media(id: $id, type: ANIME) {
+        id
+        title { romaji english }
+        description(asHtml: false)
+        coverImage { large }
+        relations {
+          edges {
+            relationType(version: 2)
+            node { id title { romaji english } coverImage { large } }
           }
         }
-      `;
-      const res = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables: { id: Number(animeId) } })
-      });
-      const data = await res.json();
-      const anime = data.data.Media;
-
-      // Hero Section
-      document.getElementById('anime-poster').src = anime.coverImage.large;
-      document.getElementById('anime-title').textContent = anime.title.english || anime.title.romaji;
-      document.getElementById('anime-genres').textContent = anime.genres.join(', ');
-      document.getElementById('anime-info').textContent = `${anime.seasonYear || ''} • ⭐ ${anime.averageScore || 'N/A'}% • ${anime.episodes || '?'} Episodes`;
-      document.getElementById('anime-description').innerHTML = anime.description;
-      if (anime.bannerImage) {
-        document.getElementById('anime-hero').style.backgroundImage = `url(${anime.bannerImage})`;
-        document.getElementById('anime-hero').style.backgroundSize = 'cover';
-        document.getElementById('anime-hero').style.backgroundPosition = 'center';
-      }
-
-      // Episodes List (basic numbering)
-      const episodesContainer = document.getElementById('episodes-list');
-      if (anime.episodes) {
-        for (let i = 1; i <= anime.episodes; i++) {
-          const epCard = document.createElement('div');
-          epCard.className = 'bg-black/60 p-3 rounded-lg text-center hover:bg-[#ff4444]/20 cursor-pointer transition';
-          epCard.textContent = `Episode ${i}`;
-          episodesContainer.appendChild(epCard);
+        characters(role: MAIN, perPage: 6) {
+          edges {
+            node { name { full } image { large } }
+          }
         }
-      } else {
-        episodesContainer.innerHTML = `<p class="text-gray-400 italic">No episodes found.</p>`;
-      }
-
-      // Recommended Anime
-      const recContainer = document.getElementById('recommended');
-      anime.recommendations.nodes.forEach(rec => {
-        if (rec.mediaRecommendation) {
-          recContainer.appendChild(createAnimeCard(rec.mediaRecommendation));
+        recommendations(perPage: 10, sort: RATING_DESC) {
+          nodes {
+            mediaRecommendation { id title { romaji english } coverImage { large } }
+          }
         }
-      });
+      }
     }
+  `;
 
-    loadPartials();
-  </script>
+  const res = await fetch('https://graphql.anilist.co', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables: { id: Number(id) } })
+  });
+  const data = await res.json();
+  const anime = data.data.Media;
+
+  // Fill main details
+  document.getElementById("anime-title").textContent = anime.title.english || anime.title.romaji;
+  document.getElementById("anime-synopsis").textContent = anime.description || "No description available.";
+  document.getElementById("anime-poster").src = anime.coverImage.large;
+
+  // Fetch episodes from your episodes.json
+  const epData = await fetch("https://raw.githubusercontent.com/animeneek/AnimeNeek/main/data/episodes.json").then(r => r.json());
+  const thisAnimeEps = epData[anime.id] || [];
+  const epContainer = document.getElementById("episodes-list");
+  if (thisAnimeEps.length > 0) {
+    thisAnimeEps.forEach(ep => {
+      const epCard = document.createElement("div");
+      epCard.className = "episode-card";
+      epCard.textContent = `EP ${ep.number}`;
+      epContainer.appendChild(epCard);
+    });
+  } else {
+    epContainer.innerHTML = `<p class="text-gray-400 italic">No episodes found.</p>`;
+  }
+
+  // Relations
+  const relContainer = document.getElementById("relations");
+  anime.relations.edges.forEach(rel => {
+    const relCard = document.createElement("a");
+    relCard.href = `anime.html?id=${rel.node.id}`;
+    relCard.className = "w-[100px] flex-shrink-0";
+    relCard.innerHTML = `
+      <img src="${rel.node.coverImage.large}" class="w-full h-[140px] object-cover rounded" />
+      <p class="text-xs mt-1 truncate">${rel.node.title.english || rel.node.title.romaji}</p>
+    `;
+    relContainer.appendChild(relCard);
+  });
+
+  // Characters
+  const charContainer = document.getElementById("characters");
+  anime.characters.edges.forEach(char => {
+    const charCard = document.createElement("div");
+    charCard.className = "w-[80px] text-center";
+    charCard.innerHTML = `
+      <img src="${char.node.image.large}" class="w-[80px] h-[80px] object-cover rounded-full mx-auto" />
+      <p class="text-xs mt-1 truncate">${char.node.name.full}</p>
+    `;
+    charContainer.appendChild(charCard);
+  });
+
+  // Recommendations
+  const recContainer = document.getElementById("recommendations");
+  anime.recommendations.nodes.forEach(rec => {
+    recContainer.appendChild(createAnimeCard(rec.mediaRecommendation));
+  });
+}
+
+loadPartials();
+</script>
 
 </body>
 </html>
