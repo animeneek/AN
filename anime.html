@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AnimeNeek - Anime Details</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/favicon-image.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    a.genre-tag {
+      background-color: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.5);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      transition: 0.2s;
+    }
+    a.genre-tag:hover {
+      background-color: #ff4444;
+      color: white;
+    }
+    .inactive-btn {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <div id="header"></div>
+
+  <main class="flex-grow container mx-auto px-4 py-6 max-w-screen-lg">
+
+    <!-- Anime Info -->
+    <section id="anime-details" class="flex flex-col md:flex-row gap-6">
+      <!-- Poster -->
+      <div class="flex-shrink-0 w-full md:w-1/3">
+        <img id="anime-poster" src="" alt="Anime Poster" class="w-full rounded-lg shadow-lg object-cover" />
+      </div>
+
+      <!-- Details -->
+      <div class="flex-grow space-y-4">
+        <div>
+          <h1 id="anime-title" class="text-3xl font-bold text-[#ff4444]"></h1>
+          <p id="anime-alt-titles" class="text-sm text-gray-400 italic"></p>
+        </div>
+        <p id="anime-synopsis" class="text-gray-300 leading-relaxed"></p>
+
+        <!-- Genres -->
+        <div id="anime-genres" class="flex flex-wrap gap-2"></div>
+
+        <!-- Info Table -->
+        <div class="grid grid-cols-2 gap-y-1 text-sm text-gray-300">
+          <span class="font-semibold">Format:</span> <span id="anime-format"></span>
+          <span class="font-semibold">Status:</span> <span id="anime-status"></span>
+          <span class="font-semibold">Episodes:</span> <span id="anime-episodes"></span>
+        </div>
+
+        <!-- Watch Buttons -->
+        <div class="flex gap-4 mt-4">
+          <a id="btn-raw" href="#" class="px-4 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-black font-bold transition">RAW</a>
+          <a id="btn-sub" href="#" class="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-black font-bold transition">SUB</a>
+          <a id="btn-dub" href="#" class="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-black font-bold transition">DUB</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related / Characters / Staff Tabs -->
+    <section class="mt-10">
+      <h2 class="text-2xl font-bold text-[#ff4444] mb-4">More Information</h2>
+      <div id="related-info" class="space-y-4 text-gray-300">
+        <!-- Will be filled dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <div id="footer"></div>
+
+  <script>
+    async function loadPartials() {
+      const headerHTML = await fetch("header.html").then(res => res.text());
+      document.getElementById("header").innerHTML = headerHTML;
+
+      const footerHTML = await fetch("footer.html").then(res => res.text());
+      document.getElementById("footer").innerHTML = footerHTML;
+
+      setupMobileMenuToggle();
+      await initAnimePage();
+    }
+
+    function setupMobileMenuToggle() {
+      const btn = document.getElementById("menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      if (btn && menu) {
+        btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+      }
+    }
+
+    function getAnimeIdFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("id");
+    }
+
+    async function fetchAnimeDetails(id) {
+      const query = `
+        query ($id: Int) {
+          Media(id: $id, type: ANIME) {
+            id
+            title { romaji english native }
+            coverImage { large }
+            description(asHtml: false)
+            genres
+            format
+            status
+            episodes
+            relations {
+              edges {
+                relationType(version: 2)
+                node {
+                  id
+                  title { romaji english }
+                }
+              }
+            }
+            characters(sort: ROLE) {
+              edges {
+                role
+                node {
+                  name { full }
+                }
+              }
+            }
+            staff(sort: RELEVANCE) {
+              edges {
+                role
+                node {
+                  name { full }
+                }
+              }
+            }
+          }
+        }
+      `;
+      const res = await fetch("https://graphql.anilist.co", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables: { id } })
+      });
+      const data = await res.json();
+      return data.data.Media;
+    }
+
+    async function checkJsonAvailability(id) {
+      try {
+        const res = await fetch("episodes.json"); // <-- Your JSON file
+        const json = await res.json();
+        return json[id] || null;
+      } catch {
+        return null;
+      }
+    }
+
+    async function initAnimePage() {
+      const animeId = getAnimeIdFromURL();
+      if (!animeId) return;
+
+      const anime = await fetchAnimeDetails(animeId);
+      document.getElementById("anime-poster").src = anime.coverImage.large;
+      document.getElementById("anime-title").textContent = anime.title.english || anime.title.romaji;
+      document.getElementById("anime-alt-titles").textContent = `${anime.title.romaji} | ${anime.title.native || ''}`;
+      document.getElementById("anime-synopsis").innerHTML = anime.description || "No description available.";
+      document.getElementById("anime-format").textContent = anime.format || "N/A";
+      document.getElementById("anime-status").textContent = anime.status || "N/A";
+      document.getElementById("anime-episodes").textContent = anime.episodes || "N/A";
+
+      // Genres
+      const genresContainer = document.getElementById("anime-genres");
+      anime.genres.forEach(genre => {
+        const g = document.createElement("a");
+        g.href = `search.html?genre=${encodeURIComponent(genre)}`;
+        g.textContent = genre;
+        g.className = "genre-tag";
+        genresContainer.appendChild(g);
+      });
+
+      // Watch Buttons Availability
+      const availability = await checkJsonAvailability(animeId);
+      const btnRaw = document.getElementById("btn-raw");
+      const btnSub = document.getElementById("btn-sub");
+      const btnDub = document.getElementById("btn-dub");
+
+      btnRaw.href = `/watch.html?id=${animeId}&type=raw`;
+      btnSub.href = `/watch.html?id=${animeId}&type=sub`;
+      btnDub.href = `/watch.html?id=${animeId}&type=dub`;
+
+      if (!availability) {
+        btnRaw.classList.add("inactive-btn");
+        btnSub.classList.add("inactive-btn");
+        btnDub.classList.add("inactive-btn");
+      } else {
+        if (!availability.types.includes("raw")) btnRaw.classList.add("inactive-btn");
+        if (!availability.types.includes("sub")) btnSub.classList.add("inactive-btn");
+        if (!availability.types.includes("dub")) btnDub.classList.add("inactive-btn");
+      }
+
+      // Related Info
+      const related = document.getElementById("related-info");
+      if (anime.relations.edges.length) {
+        related.innerHTML += `<h3 class="font-semibold text-lg">Related Anime</h3>`;
+        anime.relations.edges.forEach(r => {
+          related.innerHTML += `<p><a href="anime.html?id=${r.node.id}" class="text-[#ff4444] hover:underline">${r.relationType}: ${r.node.title.english || r.node.title.romaji}</a></p>`;
+        });
+      }
+      if (anime.characters.edges.length) {
+        related.innerHTML += `<h3 class="font-semibold text-lg mt-4">Characters</h3>`;
+        anime.characters.edges.forEach(c => {
+          related.innerHTML += `<p>${c.node.name.full} - ${c.role}</p>`;
+        });
+      }
+      if (anime.staff.edges.length) {
+        related.innerHTML += `<h3 class="font-semibold text-lg mt-4">Staff</h3>`;
+        anime.staff.edges.forEach(s => {
+          related.innerHTML += `<p>${s.node.name.full} - ${s.role}</p>`;
+        });
+      }
+    }
+
+    loadPartials();
+  </script>
+
+</body>
+</html>
