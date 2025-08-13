@@ -18,8 +18,12 @@
       font-size: 1.5rem;
     }
     @media (max-width: 768px) {
-      .section-heading { font-size: 1.25rem; }
-      .section-heading i { font-size: 1.25rem; }
+      .section-heading {
+        font-size: 1.25rem;
+      }
+      .section-heading i {
+        font-size: 1.25rem;
+      }
     }
     .slider-container {
       padding-left: 1rem;
@@ -30,11 +34,12 @@
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
     }
-    .slider-container::-webkit-scrollbar { display: none; }
-    .slider-container { -ms-overflow-style: none; scrollbar-width: none; }
-    .poster-fixed {
-      aspect-ratio: 2/3;
-      object-fit: cover;
+    .slider-container::-webkit-scrollbar {
+      display: none;
+    }
+    .slider-container {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
@@ -48,21 +53,13 @@
     <section id="anime-hero" class="relative rounded-lg overflow-hidden">
       <div id="hero-bg" class="absolute inset-0 bg-black/70"></div>
       <div class="relative z-10 flex flex-col md:flex-row gap-6 p-6">
-        <img id="anime-poster" class="w-48 md:w-60 rounded-lg shadow-lg flex-shrink-0 poster-fixed" alt="Anime Poster" />
+        <img id="anime-poster" class="w-48 md:w-60 rounded-lg shadow-lg flex-shrink-0" alt="Anime Poster" />
         <div>
           <h1 id="anime-title" class="text-3xl md:text-4xl font-bold text-[#ff4444] mb-2"></h1>
           <p id="anime-genres" class="text-gray-300 text-sm mb-4"></p>
           <p id="anime-info" class="text-gray-400 text-sm mb-6"></p>
           <p id="anime-description" class="text-gray-200 leading-relaxed"></p>
         </div>
-      </div>
-    </section>
-
-    <!-- Overview -->
-    <section>
-      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-circle-info"></i> Overview</h2>
-      <div id="anime-overview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4 text-gray-300 text-sm">
-        <!-- Overview data here -->
       </div>
     </section>
 
@@ -74,22 +71,12 @@
       </div>
     </section>
 
-    <!-- Relations -->
-    <section>
-      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-link"></i> Relations</h2>
-      <div id="relations" class="slider-container mt-4"></div>
-    </section>
-
-    <!-- Main Characters -->
-    <section>
-      <h2 class="section-heading text-[#ff4444]"><i class="fas fa-users"></i> Main Characters</h2>
-      <div id="characters" class="slider-container mt-4"></div>
-    </section>
-
     <!-- Recommendations -->
     <section>
       <h2 class="section-heading text-[#ff4444]"><i class="fas fa-star"></i> Recommended</h2>
-      <div id="recommended" class="slider-container mt-4"></div>
+      <div id="recommended" class="slider-container mt-4">
+        <!-- Recommended anime will load here -->
+      </div>
     </section>
 
   </main>
@@ -112,12 +99,15 @@
       const btn = document.getElementById("menu-btn");
       const menu = document.getElementById("mobile-menu");
       if (btn && menu) {
-        btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+        btn.addEventListener("click", () => {
+          menu.classList.toggle("hidden");
+        });
       }
     }
 
     function getQueryParam(name) {
-      return new URLSearchParams(window.location.search).get(name);
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
     }
 
     function createAnimeCard(anime) {
@@ -142,6 +132,7 @@
         return;
       }
 
+      // Fetch Anime Details + Recommendations
       const query = `
         query ($id: Int) {
           Media(id: $id, type: ANIME) {
@@ -154,13 +145,14 @@
             averageScore
             seasonYear
             episodes
-            duration
-            relations { edges { node { id title { romaji english } coverImage { large } type } } }
-            characters(role: MAIN, page: 1, perPage: 10) {
-              edges { node { name { full } image { large } } }
-            }
             recommendations(page: 1, perPage: 10) {
-              nodes { mediaRecommendation { id title { romaji english } coverImage { large } } }
+              nodes {
+                mediaRecommendation {
+                  id
+                  title { romaji english }
+                  coverImage { large }
+                }
+              }
             }
           }
         }
@@ -173,63 +165,32 @@
       const data = await res.json();
       const anime = data.data.Media;
 
+      // Hero Section
       document.getElementById('anime-poster').src = anime.coverImage.large;
       document.getElementById('anime-title').textContent = anime.title.english || anime.title.romaji;
       document.getElementById('anime-genres').textContent = anime.genres.join(', ');
       document.getElementById('anime-info').textContent = `${anime.seasonYear || ''} • ⭐ ${anime.averageScore || 'N/A'}% • ${anime.episodes || '?'} Episodes`;
-      document.getElementById('anime-description').innerHTML = anime.description.replace(/<br><br>/g, ' ');
+      document.getElementById('anime-description').innerHTML = anime.description;
       if (anime.bannerImage) {
         document.getElementById('anime-hero').style.backgroundImage = `url(${anime.bannerImage})`;
         document.getElementById('anime-hero').style.backgroundSize = 'cover';
         document.getElementById('anime-hero').style.backgroundPosition = 'center';
       }
 
-      // Overview
-      const overview = document.getElementById('anime-overview');
-      overview.innerHTML = `
-        <div><strong>Year:</strong> ${anime.seasonYear || 'N/A'}</div>
-        <div><strong>Rating:</strong> ${anime.averageScore || 'N/A'}%</div>
-        <div><strong>Episodes:</strong> ${anime.episodes || '?'}</div>
-        <div><strong>Duration:</strong> ${anime.duration || '?'} min</div>
-      `;
-
-      // Episodes from JSON
+      // Episodes List (basic numbering)
       const episodesContainer = document.getElementById('episodes-list');
-      try {
-        const eps = await fetch("https://raw.githubusercontent.com/animeneek/AN/main/episodes.json").then(r => r.json());
-        if (eps[animeId]) {
-          eps[animeId].forEach(ep => {
-            const epCard = document.createElement('div');
-            epCard.className = 'bg-black/60 p-3 rounded-lg text-center hover:bg-[#ff4444]/20 cursor-pointer transition';
-            epCard.textContent = `EP ${ep.number}`;
-            episodesContainer.appendChild(epCard);
-          });
-        } else {
-          episodesContainer.innerHTML = `<p class="text-gray-400 italic">No episodes found.</p>`;
+      if (anime.episodes) {
+        for (let i = 1; i <= anime.episodes; i++) {
+          const epCard = document.createElement('div');
+          epCard.className = 'bg-black/60 p-3 rounded-lg text-center hover:bg-[#ff4444]/20 cursor-pointer transition';
+          epCard.textContent = `Episode ${i}`;
+          episodesContainer.appendChild(epCard);
         }
-      } catch (e) {
-        episodesContainer.innerHTML = `<p class="text-gray-400 italic">Error loading episodes.</p>`;
+      } else {
+        episodesContainer.innerHTML = `<p class="text-gray-400 italic">No episodes found.</p>`;
       }
 
-      // Relations
-      const relContainer = document.getElementById('relations');
-      anime.relations.edges.forEach(rel => {
-        relContainer.appendChild(createAnimeCard(rel.node));
-      });
-
-      // Characters
-      const charContainer = document.getElementById('characters');
-      anime.characters.edges.forEach(ch => {
-        const card = document.createElement('div');
-        card.className = 'min-w-[140px] text-center';
-        card.innerHTML = `
-          <img src="${ch.node.image.large}" class="w-full aspect-[2/3] object-cover rounded-lg mb-2" />
-          <p class="text-sm">${ch.node.name.full}</p>
-        `;
-        charContainer.appendChild(card);
-      });
-
-      // Recommended
+      // Recommended Anime
       const recContainer = document.getElementById('recommended');
       anime.recommendations.nodes.forEach(rec => {
         if (rec.mediaRecommendation) {
@@ -240,5 +201,6 @@
 
     loadPartials();
   </script>
+
 </body>
 </html>
