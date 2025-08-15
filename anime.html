@@ -23,7 +23,9 @@
     .reco-card{flex:0 0 140px}
     .reco-card img{border-radius:.5rem}
     .section-title{font-size:1.125rem;font-weight:600;color:#ff6b6b;display:flex;align-items:center;gap:.5rem}
-    .info-grid span:first-child{color:#bbb}
+    /* Fix: label/value pairing always neat */
+    .info-grid{display:grid;grid-template-columns: max-content 1fr;gap:.25rem 1rem}
+    .info-grid > span:nth-child(odd){color:#bbb}
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -35,19 +37,12 @@
 
     <!-- Top: Poster + Details -->
     <section id="anime-details" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-      <!-- Poster + Favourite -->
+      <!-- Poster -->
       <aside class="md:col-span-1 space-y-4">
         <div class="w-full">
           <img id="anime-poster" src="" alt="Anime Poster" class="w-full h-auto max-h-[420px] object-cover rounded-xl shadow-xl" />
         </div>
-
-        <!-- Favourite button (local placeholder) -->
-        <div class="glass rounded-xl p-3">
-          <button id="fav-btn" class="w-full bg-[#ff4444] hover:bg-red-600 text-white py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2">
-            <i class="fa fa-heart"></i><span>Favourite</span>
-          </button>
-          <p id="fav-note" class="text-xs text-gray-400 mt-2 text-center hidden">Added to your device favourites.</p>
-        </div>
+        <!-- (Favourite block removed as requested) -->
       </aside>
 
       <!-- Details -->
@@ -62,8 +57,8 @@
         <!-- Genres -->
         <div id="anime-genres" class="flex flex-wrap gap-2"></div>
 
-        <!-- Tight info grid + rating -->
-        <div class="info-grid grid grid-cols-2 sm:grid-cols-3 gap-y-1 text-sm">
+        <!-- Tight info grid + rating (fixed pairing) -->
+        <div class="info-grid text-sm">
           <span>Format</span><span id="anime-format" class="font-medium">—</span>
           <span>Status</span><span id="anime-status" class="font-medium">—</span>
           <span>Episodes</span><span id="anime-episodes" class="font-medium">—</span>
@@ -182,12 +177,31 @@
       return j.data?.Media;
     }
 
-    async function checkJsonAvailability(id){
+    // Build availability from episodes.json (array format)
+    async function computeAvailability(id){
       try{
         const res = await fetch("episodes.json",{cache:"no-store"});
-        const json = await res.json();
-        return json[id] || null;
-      }catch(e){ return null; }
+        const json = await res.json(); // array of entries
+        const typesForId = new Set(
+          json.filter(item => String(item.id) === String(id)).map(item => item.type)
+        );
+
+        // Activation rules
+        const hasAnime = typesForId.has("anime");
+        const hasHRaw  = typesForId.has("h-raw");
+        const hasHSub  = typesForId.has("h-sub");
+        const hasHDub  = typesForId.has("h-dub");
+
+        return {
+          raw: hasHRaw,                         // RAW from h-raw
+          sub: hasAnime || hasHSub,             // SUB from anime or h-sub
+          dub: hasAnime || hasHDub,             // DUB from anime or h-dub
+          any: (hasHRaw || hasAnime || hasHSub || hasHDub)
+        };
+      }catch(e){
+        console.error("episodes.json load error", e);
+        return {raw:false, sub:false, dub:false, any:false};
+      }
     }
 
     // --- Renderers ---
@@ -313,42 +327,27 @@
       document.getElementById("anime-rating").textContent = media.averageScore ? `${media.averageScore}/100` : "—";
       renderGenres(media.genres);
 
-      // Watch buttons availability
-      const availability = await checkJsonAvailability(id);
+      // Watch buttons availability (from episodes.json rules)
+      const avail = await computeAvailability(id);
       const btnRaw = document.getElementById("btn-raw");
       const btnSub = document.getElementById("btn-sub");
       const btnDub = document.getElementById("btn-dub");
+
+      // Keep your original href style
       btnRaw.href = `/watch.html?id=${id}&type=raw`;
       btnSub.href = `/watch.html?id=${id}&type=sub`;
       btnDub.href = `/watch.html?id=${id}&type=dub`;
-      if(!availability){ btnRaw.classList.add("inactive-btn"); btnSub.classList.add("inactive-btn"); btnDub.classList.add("inactive-btn"); }
-      else{
-        if(!availability.types?.includes("raw")) btnRaw.classList.add("inactive-btn");
-        if(!availability.types?.includes("sub")) btnSub.classList.add("inactive-btn");
-        if(!availability.types?.includes("dub")) btnDub.classList.add("inactive-btn");
-      }
 
-      // Related / Characters / Staff / Recos
+      // Start inactive; activate per rules
+      if(!avail.raw) btnRaw.classList.add("inactive-btn"); else btnRaw.classList.remove("inactive-btn");
+      if(!avail.sub) btnSub.classList.add("inactive-btn"); else btnSub.classList.remove("inactive-btn");
+      if(!avail.dub) btnDub.classList.add("inactive-btn"); else btnDub.classList.remove("inactive-btn");
+
+      // Related / Characters / Staff / Recos (unchanged)
       renderRelated(media.relations?.edges || []);
       renderCharacters(media.characters?.edges || []);
       renderStaff(media.staff?.edges || []);
       renderRecommendations(media.recommendations?.nodes || []);
-
-      // Favourite (local placeholder)
-      const favBtn = document.getElementById("fav-btn");
-      const favNote = document.getElementById("fav-note");
-      favBtn.addEventListener("click", ()=>{
-        try{
-          const key = "animeneek_favourites";
-          const favs = JSON.parse(localStorage.getItem(key)||"[]");
-          if(!favs.find(x=>x.id==media.id)){
-            favs.push({ id:media.id, title:media.title.english||media.title.romaji, coverImage:media.coverImage.large });
-            localStorage.setItem(key, JSON.stringify(favs));
-          }
-          favNote.classList.remove("hidden");
-          setTimeout(()=>favNote.classList.add("hidden"), 2000);
-        }catch(e){}
-      });
     }
 
     // Kickoff
