@@ -43,7 +43,11 @@
       position:relative;
     }
     select:focus{outline:none;border-color:#ff4444;box-shadow:0 0 0 2px rgba(255,68,68,.35)}
-    select option{background:rgba(15,15,15,.9);color:#fff}
+select option{
+  background:rgba(15,15,15,.55);
+  backdrop-filter:blur(10px);
+  color:#fff;
+}
     select::-webkit-scrollbar{width:8px}
     select::-webkit-scrollbar-thumb{background:#ff4444;border-radius:10px}
     select::-webkit-scrollbar-track{background:transparent}
@@ -72,7 +76,15 @@
     .chip.active{background:rgba(255,68,68,.18); border-color:#ff6b6b; color:#fff}
 
     /* Segmented source buttons */
-    .seg{display:inline-flex; flex-wrap:wrap; border:1px solid rgba(255,255,255,.14); border-radius:.8rem; overflow:hidden; background:rgba(255,255,255,.06); backdrop-filter:blur(8px)}
+.seg{
+  display:inline-flex;
+  flex-wrap:wrap;
+  border:1px solid rgba(255,68,68,.35);
+  border-radius:.8rem;
+  overflow:hidden;
+  background:rgba(15,15,15,.35);
+  backdrop-filter:blur(12px);
+}
     .seg button{
       padding:.55rem .9rem; font-weight:700; font-size:.85rem; letter-spacing:.03em; color:#cfd6dd;
       transition:background .12s ease, color .12s ease;
