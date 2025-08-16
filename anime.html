@@ -19,13 +19,20 @@
       display:flex;gap:.5rem;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;
       padding:.5rem 0;
     }
-    .rail::-webkit-scrollbar{height:6px}
-    .rail::-webkit-scrollbar-thumb{
-      background:rgba(255,255,255,.15);
-      border-radius:4px;
-    }
-    .rail::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
-    .rail::-webkit-scrollbar-track{background:transparent}
+.rail::-webkit-scrollbar {
+  height: 4px;
+}
+.rail::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+}
+.rail::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 68, 68, 0.6);
+}
+.rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 
     .card-mini{flex:0 0 110px}
     .card-mini img{border-radius:.5rem}
@@ -40,9 +47,9 @@
     /* Premium selects - glassy */
 /* Replace the existing select styles with these */
 select {
-  background: rgba(20, 20, 20, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 68, 68, 0.4);
+  background: rgba(30, 30, 30, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 68, 68, 0.35);
   color: #e0f0ff;
   border-radius: 0.6rem;
   padding: 0.4rem 2rem 0.4rem 0.8rem;
@@ -51,9 +58,11 @@ select {
   font-size: 0.85rem;
 }
 select option {
-  background: rgba(15, 15, 15, 0.9);
+  background: rgba(20, 20, 20, 0.65);
+  backdrop-filter: blur(6px);
   color: #fff;
 }
+
     select:focus{outline:none;border-color:#ff4444;box-shadow:0 0 0 2px rgba(255,68,68,.35)}
     select::-webkit-scrollbar{width:8px}
     select::-webkit-scrollbar-thumb{background:#ff4444;border-radius:10px}
@@ -100,17 +109,17 @@ select option {
 /* Replace the existing .seg styles with these */
 .seg {
   display: inline-flex;
-  border: 1px solid rgba(255, 68, 68, 0.25);
+  border: 1px solid rgba(255, 68, 68, 0.35);
   border-radius: 0.6rem;
   overflow: hidden;
-  background: rgba(15, 15, 15, 0.4);
-  backdrop-filter: blur(12px);
+  background: rgba(20, 20, 20, 0.35);
+  backdrop-filter: blur(10px);
 }
 .seg button {
-  padding: 0.45rem 0.9rem;
+  padding: 0.45rem 1rem;
   font-weight: 600;
   font-size: 0.8rem;
-  color: #cfd6dd;
+  color: #e0e6ec;
   transition: all 0.12s ease;
   background: transparent;
 }
@@ -120,11 +129,12 @@ select option {
 .seg button[aria-pressed="true"] {
   background: rgba(255, 68, 68, 0.5);
   color: #fff;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 .seg button:not([aria-pressed="true"]):hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
+
     .seg button:disabled{opacity:.5; cursor:not-allowed}
 
     /* Play button */
