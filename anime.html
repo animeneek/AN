@@ -13,7 +13,7 @@
     .glass{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15)}
     .tag{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.5);padding:2px 10px;border-radius:9999px;font-size:.8rem}
     .tag:hover{background:#ff4444;color:#fff}
-    .rail{display:flex;gap:.75rem;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;padding-bottom:.25rem}
+    .rail{display:flex;gap:.5rem;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;padding-bottom:.25rem}
     .rail::-webkit-scrollbar{height:6px}
     .rail::-webkit-scrollbar-thumb{background:#ff4444;border-radius:10px}
     .card-mini{flex:0 0 110px}
@@ -26,39 +26,69 @@
     .info-grid{display:grid;grid-template-columns:max-content 1fr;gap:.25rem 1rem}
     .info-grid>span:nth-child(odd){color:#bbb}
 
-    /* Premium dropdown look */
+    /* Premium selects (fallbacks only) */
     select{
-      background:rgba(30,60,90,.4);
-      backdrop-filter:blur(12px);
-      border:1px solid rgba(255,255,255,.15);
+      background:rgba(30,60,90,.35);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.12);
       color:#e0f0ff;
       border-radius:.75rem;
-      padding:.5rem 2.5rem .5rem .75rem;
+      padding:.5rem 2.25rem .5rem .75rem;
       appearance:none;
       font-weight:500;
       position:relative;
     }
-    select:focus{outline:none;border-color:#4dabf7;box-shadow:0 0 0 2px rgba(77,171,247,.5)}
+    select:focus{outline:none;border-color:#4dabf7;box-shadow:0 0 0 2px rgba(77,171,247,.35)}
     select option{background:#0d1117;color:#e0f0ff}
     select::-webkit-scrollbar{width:8px}
     select::-webkit-scrollbar-thumb{background:#4dabf7;border-radius:10px}
     select::-webkit-scrollbar-track{background:transparent}
 
-    /* Overlay text */
+    /* Player overlay */
     #player-overlay{
-      position:absolute;
-      inset:0;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      background:rgba(0,0,0,.6);
-      color:#fff;
-      font-size:1.25rem;
-      font-weight:600;
-      text-align:center;
+      position:absolute; inset:0; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:rgba(0,0,0,.6); color:#fff; font-size:1.1rem; font-weight:600; text-align:center;
     }
-    #player-overlay i{margin-top:.5rem;font-size:1.5rem;color:#ff6b6b}
+    #player-overlay i{margin-top:.5rem;font-size:1.25rem;color:#ff6b6b}
+
+    /* Control bar */
+    .controls{gap:1rem}
+    .controls .block-label{font-size:.75rem;color:#aab4c0;letter-spacing:.02em;margin-bottom:.25rem}
+
+    /* Episode chip */
+    .chip{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      backdrop-filter:blur(8px);
+      padding:.4rem .7rem; border-radius:.7rem; font-size:.85rem;
+      color:#e6edf3; white-space:nowrap; transition:transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .chip:hover{transform:translateY(-1px); background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25)}
+    .chip.active{background:rgba(255,68,68,.18); border-color:#ff6b6b; color:#fff}
+
+    /* Segmented source buttons */
+    .seg{display:inline-flex; border:1px solid rgba(255,255,255,.14); border-radius:.8rem; overflow:hidden; background:rgba(255,255,255,.06); backdrop-filter:blur(8px)}
+    .seg button{
+      padding:.55rem .9rem; font-weight:700; font-size:.85rem; letter-spacing:.03em; color:#cfd6dd;
+      transition:background .12s ease, color .12s ease;
+    }
+    .seg button+button{border-left:1px solid rgba(255,255,255,.1)}
+    .seg button[aria-pressed="true"]{background:#ff4d4d; color:#000}
+    .seg button:disabled{opacity:.5; cursor:not-allowed}
+
+    /* Play button */
+    .playbtn{
+      padding:.7rem 1.25rem; border-radius:1rem; font-weight:900; letter-spacing:.03em;
+      background:linear-gradient(135deg,#ff4d4d,#ff6b6b); color:#000;
+      box-shadow:0 8px 24px rgba(255,77,77,.25);
+      transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+    .playbtn:hover{transform:translateY(-1px); box-shadow:0 10px 28px rgba(255,77,77,.35); filter:saturate(1.05)}
+    .playbtn:disabled{opacity:.4; box-shadow:none; filter:none}
+
+    /* Title color (theme accent, no yellow) */
+    #player-title{color:#ff6b6b}
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -94,23 +124,46 @@
 
     <!-- Video Player Section -->
     <section>
-      <h2 id="player-title" class="text-xl font-bold text-center text-red-400">
-        <i class="fa fa-play-circle"></i> Select an Episode Below to Watch
+      <h2 id="player-title" class="text-xl font-bold text-center">
+        <i class="fa fa-play-circle mr-2"></i>
+        <span id="player-title-text">Pick an episode to begin</span>
       </h2>
+
       <div class="aspect-video w-full mt-4 rounded-xl overflow-hidden shadow-xl bg-black relative">
-        <iframe id="video-frame" src="https://dragonball.guru/wp-content/uploads/2021/01/goku-dragon-ball-guru.jpg" 
+        <iframe id="video-frame" src="https://dragonball.guru/wp-content/uploads/2021/01/goku-dragon-ball-guru.jpg"
           width="100%" height="100%" frameborder="0" allowfullscreen class="w-full h-full"></iframe>
         <div id="player-overlay">
           <span>Select an Episode Below</span>
           <i class="fa fa-arrow-down"></i>
         </div>
       </div>
-      <div class="flex flex-wrap gap-4 items-center justify-center mt-4">
-        <select id="episode-select"></select>
-        <select id="source-select"></select>
-        <button id="play-btn" class="px-6 py-2 rounded-2xl bg-red-500 hover:bg-red-600 font-bold transition shadow-lg">
-          <i class="fa fa-play"></i> Play
-        </button>
+
+      <!-- Controls -->
+      <div class="glass rounded-2xl p-4 mt-4 controls">
+        <!-- Episodes -->
+        <div class="mb-3">
+          <div class="block-label"><i class="fa fa-list-ol mr-1"></i> Episodes</div>
+          <div class="flex items-center gap-3">
+            <div id="episode-rail" class="rail flex-1"></div>
+            <!-- compact fallback select -->
+            <select id="episode-select" class="min-w-[170px]">
+              <option disabled selected>Loading…</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Source + Play -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="flex flex-col">
+            <div class="block-label"><i class="fa fa-language mr-1"></i> Source</div>
+            <div id="source-group" class="seg" role="tablist" aria-label="Source Toggle">
+              <!-- buttons injected -->
+            </div>
+          </div>
+          <button id="play-btn" class="playbtn self-start sm:self-auto">
+            <i class="fa fa-play"></i> Play
+          </button>
+        </div>
       </div>
     </section>
 
@@ -177,82 +230,13 @@
         if(mode==="sub") return `https://megaplay.buzz/stream/s-2/${episodeId}/sub`;
         if(mode==="dub") return `https://megaplay.buzz/stream/s-2/${episodeId}/dub`;
       }else{
+        // h-raw / h-sub / h-dub
         return `https://streamtape.to/e/${episodeId}`;
       }
       return "";
     }
 
-    async function initAnimePage(){
-      const id=qs("id");if(!id)return;
-      const media=await fetchAnimeDetails(id);
-
-      document.getElementById("anime-poster").src=media.coverImage.large;
-      document.getElementById("anime-title").textContent=media.title.english||media.title.romaji;
-      document.getElementById("anime-alt-titles").textContent=[media.title.romaji,media.title.native].filter(Boolean).join(" | ");
-      document.getElementById("anime-synopsis").innerHTML=media.description||"No description available.";
-      document.getElementById("anime-format").textContent=media.format||"—";
-      document.getElementById("anime-status").textContent=media.status||"—";
-      document.getElementById("anime-episodes").textContent=media.episodes||"—";
-      document.getElementById("anime-rating").textContent=media.averageScore?`${media.averageScore}/100`:"—";
-      renderGenres(media.genres);
-
-      renderRelated(media.relations?.edges||[]);
-      renderCharacters(media.characters?.edges||[]);
-      renderStaff(media.staff?.edges||[]);
-      renderRecommendations(media.recommendations?.nodes||[]);
-
-      const epData=await loadEpisodes(id);
-      const epSelect=document.getElementById("episode-select");
-      const sourceSelect=document.getElementById("source-select");
-      const playBtn=document.getElementById("play-btn");
-
-      if(!epData||!epData.episodes||!epData.episodes.length){
-        epSelect.innerHTML=`<option>Episodes Coming Soon</option>`;
-        sourceSelect.innerHTML=`<option>---</option>`;
-        playBtn.classList.add("inactive-btn");
-        return;
-      }
-
-      epData.episodes.forEach(ep=>{
-        const opt=document.createElement("option");
-        opt.value=ep.id;
-        opt.textContent="Episode "+ep.episode;
-        epSelect.appendChild(opt);
-      });
-
-      sourceSelect.innerHTML="";
-      if(epData.type==="anime"){
-        ["sub","dub"].forEach(m=>{
-          const opt=document.createElement("option");
-          opt.value=m;
-          opt.textContent=m.toUpperCase();
-          sourceSelect.appendChild(opt);
-        });
-      }else{
-        const opt=document.createElement("option");
-        opt.value=epData.type.replace("h-","");
-        opt.textContent=opt.value.toUpperCase();
-        sourceSelect.appendChild(opt);
-      }
-
-      playBtn.addEventListener("click",()=>{
-        const epId=epSelect.value;
-        const mode=sourceSelect.value;
-        const src=buildIframeSrc(epData.type,epId,mode);
-        const frame=document.getElementById("video-frame");
-        const overlay=document.getElementById("player-overlay");
-        if(src){
-          frame.src=src;
-          overlay.style.display="none";
-          document.getElementById("player-title").textContent=`<i class="fa fa-film"></i> Now Playing: Episode ${epSelect.selectedIndex+1} (${mode.toUpperCase()})`;
-        }else{
-          frame.src="https://www.thematthewaaronshow.com/content/images/size/w2000/2022/11/New-Episodes.png";
-          overlay.style.display="none";
-          document.getElementById("player-title").textContent="Unavailable Episode Source";
-        }
-      });
-    }
-
+    // --- RENDER HELPERS ---
     function renderGenres(genres){
       const wrap=document.getElementById("anime-genres");
       wrap.innerHTML="";
@@ -333,7 +317,163 @@
       });
     }
 
-    // Start loading everything when DOM is ready
+    // --- Player controls state ---
+    let selectedEpisodeId = null;
+    let selectedEpisodeLabel = null; // e.g., "1 (Part 1)"
+    let selectedMode = null; // 'sub' | 'dub' | 'raw'
+
+    function setPlayerTitle(epLabel, mode){
+      const titleSpan = document.getElementById("player-title-text");
+      if(epLabel && mode){
+        titleSpan.textContent = `Now Playing • Episode ${epLabel} — ${mode.toUpperCase()}`;
+      }else{
+        titleSpan.textContent = "Pick an episode to begin";
+      }
+    }
+
+    function createSourceButtons(type){
+      const group = document.getElementById("source-group");
+      group.innerHTML = "";
+
+      function addBtn(label, val, enabled=true, pressed=false){
+        const b=document.createElement("button");
+        b.type="button";
+        b.textContent=label;
+        b.setAttribute("aria-pressed", String(pressed));
+        if(!enabled) b.disabled=true;
+        b.addEventListener("click", ()=>{
+          [...group.querySelectorAll("button")].forEach(x=>x.setAttribute("aria-pressed","false"));
+          b.setAttribute("aria-pressed","true");
+          selectedMode = val;
+        });
+        group.appendChild(b);
+        if(pressed){ selectedMode = val; }
+      }
+
+      if(type==="anime"){
+        addBtn("SUB","sub",true,true);  // default
+        addBtn("DUB","dub",true,false);
+      }else{
+        // h-raw / h-sub / h-dub: expose only what's relevant
+        const label = type.replace("h-","").toUpperCase(); // RAW / SUB / DUB
+        const val = type.replace("h-","").toLowerCase();   // raw / sub / dub
+        addBtn(label,val,true,true);
+      }
+    }
+
+    function populateEpisodesUI(epData){
+      const rail = document.getElementById("episode-rail");
+      const select = document.getElementById("episode-select");
+      rail.innerHTML = "";
+      select.innerHTML = "";
+
+      epData.episodes.forEach((ep, idx)=>{
+        const label = String(ep.episode); // show exactly what's in JSON
+        // chip
+        const chip=document.createElement("button");
+        chip.className="chip";
+        chip.textContent=`Ep ${label}`;
+        chip.dataset.id = ep.id;
+        chip.addEventListener("click", ()=>{
+          selectedEpisodeId = ep.id;
+          selectedEpisodeLabel = label;
+          // activate
+          [...rail.querySelectorAll(".chip")].forEach(c=>c.classList.remove("active"));
+          chip.classList.add("active");
+          // sync dropdown
+          select.value = ep.id;
+        });
+        rail.appendChild(chip);
+
+        // dropdown option (fallback)
+        const opt=document.createElement("option");
+        opt.value=ep.id;
+        opt.textContent=`Episode ${label}`;
+        if(idx===0){ opt.selected=true; }
+        select.appendChild(opt);
+      });
+
+      // default select first episode
+      if(epData.episodes.length){
+        const first = epData.episodes[0];
+        selectedEpisodeId = first.id;
+        selectedEpisodeLabel = String(first.episode);
+        rail.firstChild?.classList.add("active");
+      }
+
+      // when dropdown changes, sync chips
+      select.addEventListener("change", ()=>{
+        selectedEpisodeId = select.value;
+        const found = epData.episodes.find(e => String(e.id)===String(selectedEpisodeId));
+        selectedEpisodeLabel = found ? String(found.episode) : null;
+        [...rail.querySelectorAll(".chip")].forEach(c=>{
+          c.classList.toggle("active", c.dataset.id===String(selectedEpisodeId));
+        });
+      });
+    }
+
+    async function initAnimePage(){
+      const id=qs("id");if(!id)return;
+      const media=await fetchAnimeDetails(id);
+
+      // Main details
+      document.getElementById("anime-poster").src=media.coverImage.large;
+      document.getElementById("anime-title").textContent=media.title.english||media.title.romaji;
+      document.getElementById("anime-alt-titles").textContent=[media.title.romaji,media.title.native].filter(Boolean).join(" | ");
+      document.getElementById("anime-synopsis").innerHTML=media.description||"No description available.";
+      document.getElementById("anime-format").textContent=media.format||"—";
+      document.getElementById("anime-status").textContent=media.status||"—";
+      document.getElementById("anime-episodes").textContent=media.episodes||"—";
+      document.getElementById("anime-rating").textContent=media.averageScore?`${media.averageScore}/100`:"—";
+      renderGenres(media.genres);
+
+      // Side content
+      renderRelated(media.relations?.edges||[]);
+      renderCharacters(media.characters?.edges||[]);
+      renderStaff(media.staff?.edges||[]);
+      renderRecommendations(media.recommendations?.nodes||[]);
+
+      // Episodes data
+      const epData=await loadEpisodes(id);
+      const playBtn=document.getElementById("play-btn");
+      const frame=document.getElementById("video-frame");
+      const overlay=document.getElementById("player-overlay");
+
+      if(!epData||!epData.episodes||!epData.episodes.length){
+        // No episodes
+        document.getElementById("episode-rail").innerHTML =
+          `<span class="text-sm text-gray-400 px-2 py-1">Episodes Coming Soon</span>`;
+        const sel=document.getElementById("episode-select");
+        sel.innerHTML=`<option selected>Episodes Coming Soon</option>`;
+        sel.disabled=true;
+        document.getElementById("source-group").innerHTML =
+          `<span class="text-sm text-gray-400 px-2 py-1">—</span>`;
+        playBtn.disabled=true;
+        setPlayerTitle(null,null);
+        return;
+      }
+
+      // Build UI
+      populateEpisodesUI(epData);
+      createSourceButtons(epData.type);
+
+      // Play handler
+      playBtn.addEventListener("click",()=>{
+        const src=buildIframeSrc(epData.type,selectedEpisodeId,selectedMode);
+        if(src){
+          frame.src=src;
+          overlay.style.display="none";
+          setPlayerTitle(selectedEpisodeLabel, selectedMode);
+        }else{
+          // fallback image if not available
+          frame.src="https://www.thematthewaaronshow.com/content/images/size/w2000/2022/11/New-Episodes.png";
+          overlay.style.display="none";
+          setPlayerTitle(selectedEpisodeLabel, selectedMode);
+        }
+      });
+    }
+
+    // Boot
     document.addEventListener("DOMContentLoaded", loadPartials);
   </script>
 </body>
