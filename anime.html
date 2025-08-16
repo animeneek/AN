@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AnimeNeek - Anime Details</title>
+  <title>AnimeNeek - Anime Details_v2308</title>
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/favicon-image.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
@@ -114,7 +114,10 @@ select option {
   overflow: hidden;
   background: rgba(20, 20, 20, 0.35);
   backdrop-filter: blur(10px);
+  width: fit-content;       /* 🔥 keeps box only around buttons */
+  max-width: 100%;          /* prevents overflow */
 }
+
 .seg button {
   padding: 0.45rem 1rem;
   font-weight: 600;
