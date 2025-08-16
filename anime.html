@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AnimeNeek - Anime Details</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/favicon-image.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    body{background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",sans-serif}
+    .inactive-btn{opacity:.4;pointer-events:none}
+    .glass{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06)}
+    .tag{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.5);padding:2px 10px;border-radius:9999px;font-size:.8rem}
+    .tag:hover{background:#ff4444;color:#fff}
+    .rail{display:flex;gap:.75rem;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;padding-bottom:.25rem}
+    .rail::-webkit-scrollbar{height:6px}
+    .rail::-webkit-scrollbar-thumb{background:#ff4444;border-radius:10px}
+    .card-mini{flex:0 0 110px}
+    .card-mini img{border-radius:.5rem}
+    .staff-card{flex:0 0 170px}
+    .staff-card img{border-radius:9999px}
+    .reco-card{flex:0 0 140px}
+    .reco-card img{border-radius:.5rem}
+    .section-title{font-size:1.125rem;font-weight:600;color:#ff6b6b;display:flex;align-items:center;gap:.5rem}
+    .info-grid{display:grid;grid-template-columns: max-content 1fr;gap:.25rem 1rem}
+    .info-grid > span:nth-child(odd){color:#bbb}
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- header include -->
+  <div id="header"></div>
+
+  <main class="flex-grow container mx-auto px-4 py-6 max-w-screen-xl space-y-10">
+
+    <!-- Top: Poster + Details -->
+    <section id="anime-details" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+      <!-- Poster -->
+      <aside class="md:col-span-1 space-y-4">
+        <div class="w-full">
+          <img id="anime-poster" src="" alt="Anime Poster" class="w-full h-auto max-h-[420px] object-cover rounded-xl shadow-xl" />
+        </div>
+      </aside>
+
+      <!-- Details -->
+      <div class="md:col-span-3 space-y-5">
+        <div>
+          <h1 id="anime-title" class="text-3xl md:text-4xl font-extrabold tracking-tight text-white"></h1>
+          <p id="anime-alt-titles" class="text-sm text-gray-400 italic mt-1"></p>
+        </div>
+
+        <p id="anime-synopsis" class="text-gray-300 leading-relaxed"></p>
+
+        <!-- Genres -->
+        <div id="anime-genres" class="flex flex-wrap gap-2"></div>
+
+        <!-- Info grid -->
+        <div class="info-grid text-sm">
+          <span>Format</span><span id="anime-format" class="font-medium">—</span>
+          <span>Status</span><span id="anime-status" class="font-medium">—</span>
+          <span>Episodes</span><span id="anime-episodes" class="font-medium">—</span>
+          <span>Rating</span><span id="anime-rating" class="font-medium">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Video Player Section -->
+    <section>
+      <h2 id="player-title" class="text-xl font-bold text-center text-yellow-400">🎬 Select an Episode to Start Watching 🎬</h2>
+      <div class="aspect-video w-full mt-4 rounded-xl overflow-hidden shadow-xl bg-black">
+        <iframe id="video-frame" src="" width="100%" height="100%" frameborder="0" allowfullscreen class="w-full h-full"></iframe>
+      </div>
+      <div class="flex flex-wrap gap-4 items-center justify-center mt-4">
+        <select id="episode-select" class="glass px-4 py-2 rounded-lg text-white"></select>
+        <select id="source-select" class="glass px-4 py-2 rounded-lg text-white"></select>
+        <button id="play-btn" class="px-6 py-2 rounded-2xl bg-red-500 hover:bg-red-600 font-bold transition shadow-lg">▶ Play</button>
+      </div>
+    </section>
+
+    <!-- Related -->
+    <section>
+      <h2 class="section-title"><i class="fa fa-link"></i> Related</h2>
+      <div id="related-rail" class="rail"></div>
+      <p id="related-empty" class="text-sm text-gray-500 mt-2 hidden">No related titles found.</p>
+    </section>
+
+    <!-- Characters -->
+    <section>
+      <h2 class="section-title"><i class="fa fa-users"></i> Characters & Voice Actors</h2>
+      <div id="characters-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+      <p id="characters-empty" class="text-sm text-gray-500 mt-2 hidden">No characters found.</p>
+    </section>
+
+    <!-- Staff -->
+    <section>
+      <h2 class="section-title"><i class="fa fa-id-badge"></i> Staff</h2>
+      <div id="staff-rail" class="rail"></div>
+      <p id="staff-empty" class="text-sm text-gray-500 mt-2 hidden">No staff found.</p>
+    </section>
+
+    <!-- Recommendations -->
+    <section>
+      <h2 class="section-title"><i class="fa fa-thumbs-up"></i> Recommendations</h2>
+      <div id="reco-rail" class="rail"></div>
+      <p id="reco-empty" class="text-sm text-gray-500 mt-2 hidden">No recommendations yet.</p>
+    </section>
+
+  </main>
+
+  <!-- footer include -->
+  <div id="footer"></div>
+
+  <script>
+    async function loadPartials() {
+      const headerHTML = await fetch("header.html").then(r=>r.text());
+      document.getElementById("header").innerHTML = headerHTML;
+      const footerHTML = await fetch("footer.html").then(r=>r.text());
+      document.getElementById("footer").innerHTML = footerHTML;
+      const btn = document.getElementById("menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      if(btn && menu){ btn.addEventListener("click", ()=>menu.classList.toggle("hidden")); }
+      await initAnimePage();
+    }
+
+    function qs(name){ return new URLSearchParams(location.search).get(name); }
+
+    async function fetchAnimeDetails(id){
+      const query = `
+        query ($id:Int){
+          Media(id:$id, type:ANIME){
+            id
+            title{romaji english native}
+            coverImage{large}
+            description(asHtml:false)
+            genres
+            format
+            status
+            episodes
+            averageScore
+            relations{edges{relationType(version:2) node{ id title{romaji english} coverImage{medium} }}}
+            characters(sort:ROLE){edges{role node{ id name{full} image{medium} } voiceActors(language:JAPANESE){ id name{full} languageV2 image{medium} }}}
+            staff(sort:RELEVANCE){edges{role node{ id name{full} image{medium} }}}
+            recommendations(sort:RATING_DESC){nodes{rating mediaRecommendation{id title{romaji english} coverImage{medium}}}}
+          }
+        }`;
+      const res = await fetch("https://graphql.anilist.co",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({query, variables:{id:Number(id)}})
+      });
+      const j = await res.json();
+      return j.data?.Media;
+    }
+
+    async function loadEpisodes(id){
+      const res = await fetch("episodes.json",{cache:"no-store"});
+      const json = await res.json();
+      return json.find(item=>String(item.id)===String(id));
+    }
+
+    function buildIframeSrc(type, episodeId, mode){
+      if(type==="anime"){
+        if(mode==="sub") return `https://megaplay.buzz/stream/s-2/${episodeId}/sub`;
+        if(mode==="dub") return `https://megaplay.buzz/stream/s-2/${episodeId}/dub`;
+      }else{
+        return `https://streamtape.to/e/${episodeId}`;
+      }
+      return "";
+    }
+
+    async function initAnimePage(){
+      const id = qs("id");
+      if(!id) return;
+      const media = await fetchAnimeDetails(id);
+
+      document.getElementById("anime-poster").src = media.coverImage.large;
+      document.getElementById("anime-title").textContent = media.title.english || media.title.romaji;
+      document.getElementById("anime-alt-titles").textContent = [media.title.romaji, media.title.native].filter(Boolean).join(" | ");
+      document.getElementById("anime-synopsis").innerHTML = media.description || "No description available.";
+      document.getElementById("anime-format").textContent = media.format || "—";
+      document.getElementById("anime-status").textContent = media.status || "—";
+      document.getElementById("anime-episodes").textContent = media.episodes || "—";
+      document.getElementById("anime-rating").textContent = media.averageScore ? `${media.averageScore}/100` : "—";
+      renderGenres(media.genres);
+
+      renderRelated(media.relations?.edges || []);
+      renderCharacters(media.characters?.edges || []);
+      renderStaff(media.staff?.edges || []);
+      renderRecommendations(media.recommendations?.nodes || []);
+
+      // Setup video player
+      const epData = await loadEpisodes(id);
+      if(!epData) return;
+      const epSelect = document.getElementById("episode-select");
+      epData.episodes.forEach(ep=>{
+        const opt=document.createElement("option");
+        opt.value=ep.id;
+        opt.textContent="Episode "+ep.episode;
+        epSelect.appendChild(opt);
+      });
+
+      const sourceSelect=document.getElementById("source-select");
+      sourceSelect.innerHTML="";
+      if(epData.type==="anime"){
+        ["sub","dub"].forEach(m=>{
+          const opt=document.createElement("option");
+          opt.value=m;
+          opt.textContent=m.toUpperCase();
+          sourceSelect.appendChild(opt);
+        });
+      }else{
+        const opt=document.createElement("option");
+        opt.value=epData.type.replace("h-","");
+        opt.textContent=opt.value.toUpperCase();
+        sourceSelect.appendChild(opt);
+      }
+
+      document.getElementById("play-btn").addEventListener("click",()=>{
+        const epId=epSelect.value;
+        const mode=sourceSelect.value;
+        const src=buildIframeSrc(epData.type,epId,mode);
+        document.getElementById("video-frame").src=src;
+        document.getElementById("player-title").textContent=`✨ Now Playing: Episode ${epSelect.selectedIndex+1} (${mode.toUpperCase()}) ✨`;
+      });
+    }
+
+    function renderGenres(genres){
+      const wrap = document.getElementById("anime-genres");
+      wrap.innerHTML = "";
+      (genres || []).forEach(g=>{
+        const a=document.createElement("a");
+        a.href=`search.html?genre=${encodeURIComponent(g)}`;
+        a.className="tag";
+        a.textContent=g;
+        wrap.appendChild(a);
+      });
+    }
+
+    function renderRelated(edges){
+      const rail=document.getElementById("related-rail");
+      const empty=document.getElementById("related-empty");
+      rail.innerHTML="";
+      if(!edges||!edges.length){ empty.classList.remove("hidden"); return; }
+      empty.classList.add("hidden");
+      edges.forEach(e=>{
+        const a=document.createElement("a");
+        a.href=`anime.html?id=${e.node.id}`;
+        a.className="card-mini";
+        a.innerHTML=`
+          <img src="${e.node.coverImage.medium}" class="w-[110px] h-[155px] object-cover shadow-lg rounded-lg"/>
+          <div class="text-[11px] text-center mt-1 line-clamp-2 text-gray-200">${e.node.title.english||e.node.title.romaji}</div>`;
+        rail.appendChild(a);
+      });
+    }
+
+    function renderCharacters(edges){
+      const grid=document.getElementById("characters-grid");
+      const empty=document.getElementById("characters-empty");
+      grid.innerHTML="";
+      if(!edges||!edges.length){ empty.classList.remove("hidden"); return; }
+      empty.classList.add("hidden");
+      edges.forEach(c=>{
+        const va=(c.voiceActors&&c.voiceActors[0])?c.voiceActors[0]:null;
+        const card=document.createElement("div");
+        card.className="glass rounded-xl p-3 flex gap-3";
+        card.innerHTML=`
+          <a href="character.html?id=${c.node.id}" class="flex-shrink-0">
+            <img src="${c.node.image.medium}" class="w-16 h-16 rounded-lg object-cover" alt="${c.node.name.full}">
+          </a>
+          <div class="flex-1 min-w-0">
+            <a href="character.html?id=${c.node.id}" class="font-semibold hover:underline">${c.node.name.full}</a>
+            <div class="text-xs text-gray-400">${c.role}</div>
+            ${va?`
+              <div class="flex items-center justify-between mt-2">
+                <div class="text-xs text-gray-300 text-right truncate">
+                  <a href="staff.html?id=${va.id}" class="hover:underline font-medium">${va.name.full}</a>
+                  <span class="text-gray-400"> • ${va.languageV2||""}</span>
+                </div>
+                <a href="staff.html?id=${va.id}" class="flex-shrink-0">
+                  <img src="${va.image.medium}" class="w-10 h-10 rounded-full object-cover">
+                </a>
+              </div>
+            `:`<div class="text-xs text-gray-500 mt-2">No voice actor listed</div>`}
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderStaff(edges){
+      const rail=document.getElementById("staff-rail");
+      const empty=document.getElementById("staff-empty");
+      rail.innerHTML="";
+      if(!edges||!edges.length){ empty.classList.remove("hidden"); return; }
+      empty.classList.add("hidden");
+      edges.forEach(s=>{
+        const a=document.createElement("a");
+        a.href=`staff.html?id=${s.node.id}`;
+        a.className="staff-card glass rounded-2xl p-3 flex flex-col items-center text-center";
+        a.innerHTML=`
+          <img src="${s.node.image.medium}" class="w-16 h-16 object-cover mb-2 rounded-full" alt="${s.node.name.full}">
+          <div class="text-sm font-semibold line-clamp-2">${s.node.name.full}</div>
+          <div class="text-xs text-gray-400 mt-1 line-clamp-2">${s.role}</div>`;
+        rail.appendChild(a);
+      });
+    }
+
+    function renderRecommendations(nodes){
+      const rail=document.getElementById("reco-rail");
+      const empty=document.getElementById("reco-empty");
+      rail.innerHTML="";
+      if(!nodes||!nodes.length){ empty.classList.remove("hidden"); return; }
+      empty.classList.add("hidden");
+      nodes.forEach(n=>{
+        const m=n.mediaRecommendation;
+        if(!m) return;
+        const a=document.createElement("a");
+        a.href=`anime.html?id=${m.id}`;
+        a.className="reco-card";
+        a.innerHTML=`
+          <img src="${m.coverImage.medium}" class="w-[140px] h-[200px] object-cover shadow-lg rounded-lg"/>
+          <div class="text-xs text-center mt-1 line-clamp-2 text-gray-200">${m.title.english||m.title.romaji}</div>`;
+        rail.appendChild(a);
+      });
+    }
+
+    loadPartials();
+  </script>
+</body>
+</html>
