@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AnimeNeek - Anime Details_v2337</title>
+  <title>AnimeNeek - Anime Details_v2328</title>
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/favicon-image.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
@@ -219,38 +219,9 @@ select option {
           <div class="flex items-center gap-3">
             <div id="episode-rail" class="rail flex-1"></div>
             <!-- compact fallback select -->
-<div x-data="{ open: false, selected: 'Episode 1' }" class="relative w-48">
-  <!-- Button -->
-  <button 
-    @click="open = !open" 
-    class="w-full flex justify-between items-center px-4 py-2 
-           rounded-xl border border-red-500/40 
-           bg-black/30 backdrop-blur-md text-white font-medium 
-           focus:outline-none"
-  >
-    <span x-text="selected"></span>
-    <svg class="w-4 h-4 ml-2 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
-
-  <!-- Dropdown list -->
-  <ul 
-    x-show="open" 
-    @click.outside="open = false"
-    class="absolute mt-2 w-full rounded-xl overflow-hidden 
-           bg-black/60 backdrop-blur-lg border border-red-500/40 
-           text-white shadow-lg z-50"
-  >
-    <template x-for="ep in ['Episode 1','Episode 2','Episode 3','Episode 4']">
-      <li 
-        @click="selected = ep; open = false" 
-        class="px-4 py-2 cursor-pointer hover:bg-red-500/50"
-        x-text="ep"
-      ></li>
-    </template>
-  </ul>
-</div>
+            <select id="episode-select" class="min-w-[170px]">
+              <option disabled selected>Loading…</option>
+            </select>
           </div>
         </div>
 
