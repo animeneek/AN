@@ -105,13 +105,30 @@ select option {
 }
 
 /* Scrollbar tweaks */
-#episode-rail {
-  scrollbar-width: none;          /* Firefox: hide scrollbar */
-  -ms-overflow-style: none;       /* IE/Edge: hide scrollbar */
-}
+/* Sleek red scrollbar for episode rail */
 #episode-rail::-webkit-scrollbar {
-  display: none;                  /* Chrome/Safari: hide scrollbar */
+  height: 6px; /* thin horizontal scrollbar */
 }
+
+#episode-rail::-webkit-scrollbar-thumb {
+  background: rgba(255, 68, 68, 0.5); /* glossy red thumb */
+  border-radius: 9999px;
+}
+
+#episode-rail::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 68, 68, 0.8); /* brighter red on hover */
+}
+
+#episode-rail::-webkit-scrollbar-track {
+  background: transparent; /* no track */
+}
+
+/* Firefox support */
+#episode-rail {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 68, 68, 0.5) transparent;
+}
+
 
 
     /* Player overlay */
