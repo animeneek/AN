@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AnimeNeek - Anime Details_v0005</title>
+  <title>AnimeNeek - Anime Details</title>
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/animeneek/AnimeNeek/main/assets/favicon-image.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
@@ -92,6 +92,25 @@ select option {
     #episode-select option:hover {
   background-color: #ff4444;
   color: #fff;
+}
+
+    /* Episode buttons */
+#episode-rail .chip {
+  transition: all 0.25s ease;
+}
+#episode-rail .chip:hover {
+  background: rgba(255, 68, 68, 0.25);   /* glossy red hover */
+  border-color: rgba(255, 68, 68, 0.6);
+  color: #fff;
+}
+
+/* Scrollbar tweaks */
+#episode-rail {
+  scrollbar-width: none;          /* Firefox: hide scrollbar */
+  -ms-overflow-style: none;       /* IE/Edge: hide scrollbar */
+}
+#episode-rail::-webkit-scrollbar {
+  display: none;                  /* Chrome/Safari: hide scrollbar */
 }
 
 
